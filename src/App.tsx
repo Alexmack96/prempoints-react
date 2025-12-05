@@ -1,19 +1,17 @@
-import { Outlet } from 'react-router-dom'
-import './App.css'
-import NavBar from './features/shared/NavBar'
-import { UserModal } from './features/user/components/UserModal'
+// src/App.tsx
+import { Outlet } from 'react-router-dom';
+import NavBar from './features/shared/NavBar';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 function App() {
-
   return (
     <>
-        <NavBar />
-      <Outlet />
-      <div className='flex items-center justify-center min-h-screen bg-pink-50'>
-        <UserModal/>
-      </div>
+      <NavBar />
+      <main className="container mx-auto p-4">
+        {/* This is your @RenderBody() */}
+        <Outlet />
+      </main>
     </>
-  )
+  );
 }
-
-export default App
+export default App;
