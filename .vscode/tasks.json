@@ -1,0 +1,57 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      // Not a preLaunchTask — the Aspire debug type builds the AppHost itself.
+      // Kept as the default build task (Ctrl+Shift+B).
+      "label": "build: apphost",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/api-dotnet/src/AppHost/AppHost.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": { "kind": "build", "isDefault": true }
+    },
+    {
+      "label": "build: api",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/api-dotnet/src/Api/Api.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "test: unit",
+      "command": "dotnet",
+      "type": "process",
+      "args": ["test", "${workspaceFolder}/api-dotnet/tests/UnitTests/UnitTests.csproj"],
+      "problemMatcher": "$msCompile",
+      "group": "test"
+    },
+    {
+      // Needs LocalDB (installed with the .NET SDK / SQL Server tooling). Each
+      // test class creates and drops its own PremPointsTests_* database.
+      "label": "test: integration",
+      "command": "dotnet",
+      "type": "process",
+      "args": ["test", "${workspaceFolder}/api-dotnet/tests/IntegrationTests/IntegrationTests.csproj"],
+      "problemMatcher": "$msCompile",
+      "group": "test"
+    },
+    {
+      "label": "db: apply migrations",
+      "command": "dotnet",
+      "type": "process",
+      "args": ["ef", "database", "update", "--project", "${workspaceFolder}/api-dotnet/src/Api/Api.csproj"],
+      "problemMatcher": []
+    }
+  ]
+}

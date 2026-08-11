@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    // Only an http profile. The Aspire VS Code extension prefers an "https"
+    // profile when one exists, and the dashboard served over HTTPS on a
+    // self-signed dev cert is what produces ERR_HTTP2_INADEQUATE_TRANSPORT_SECURITY
+    // in Chrome. Ports are deliberately distinct from other local Aspire
+    // projects so two AppHosts can run side by side.
+    "http": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "http://localhost:15227",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DOTNET_ENVIRONMENT": "Development",
+        "ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:19217",
+        "ASPIRE_DASHBOARD_MCP_ENDPOINT_URL": "http://localhost:18239",
+        "ASPIRE_RESOURCE_SERVICE_ENDPOINT_URL": "http://localhost:20133"
+      }
+    }
+  }
+}

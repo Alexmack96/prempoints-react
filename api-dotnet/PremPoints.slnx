@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/AppHost/AppHost.csproj" Id="760e8c16-5f5f-4a95-8a7c-e26394480283" />
+    <Project Path="src/ServiceDefaults/ServiceDefaults.csproj" Id="92b67d11-457f-4e87-ad0d-73a465505b62" />
+    <Project Path="src/Api/Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/IntegrationTests/IntegrationTests.csproj" />
+    <Project Path="tests/UnitTests/UnitTests.csproj" Id="b7ce4169-6872-4f88-abc6-b1f2f98d2a87" />
+  </Folder>
+</Solution>

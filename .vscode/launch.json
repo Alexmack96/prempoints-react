@@ -1,0 +1,66 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      // F5 target. Provided by the Aspire VS Code extension
+      // (microsoft-aspire.aspire-vscode), which drives the `aspire` CLI.
+      //
+      // This debug type starts the AppHost *and attaches a debugger to each
+      // resource it spawns*, so breakpoints in Api bind. A plain coreclr launch
+      // of the AppHost only debugs the AppHost process itself, and the API runs
+      // as a child process the debugger never sees.
+      //
+      // `program` is the workspace root; the AppHost is located via
+      // aspire.config.json (appHost.path).
+      "name": "Aspire: full stack (API + React + dashboard)",
+      "type": "aspire",
+      "request": "launch",
+      "program": "${workspaceFolder}",
+      "command": "run",
+      // Attaches a JS debugger to the React client as well, so breakpoints bind
+      // in .tsx too. "openExternalBrowser" opens the dashboard without one;
+      // "integratedBrowser" keeps it inside VS Code.
+      "dashboardBrowser": "debugChrome",
+      // Belt and braces on top of launchSettings.json having a single HTTP
+      // profile. These pin the dashboard to HTTP whichever profile the
+      // extension picks — it prefers an "https" profile when one exists, which
+      // is what produces ERR_HTTP2_INADEQUATE_TRANSPORT_SECURITY in Chrome.
+      "env": {
+        "ASPIRE_ALLOW_UNSECURED_TRANSPORT": "true",
+        "ASPNETCORE_URLS": "http://localhost:15227",
+        "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:19217",
+        "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "http://localhost:20133"
+      }
+    },
+    {
+      // For debugging the API in isolation. No Aspire, so no dashboard, no
+      // traces and no React client — the connection string comes from
+      // appsettings.Development.json rather than being injected by the AppHost.
+      "name": ".NET API only (no Aspire)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build: api",
+      "program": "${workspaceFolder}/api-dotnet/src/Api/bin/Debug/net10.0/Api.dll",
+      "cwd": "${workspaceFolder}/api-dotnet/src/Api",
+      "console": "internalConsole",
+      "stopAtEntry": false,
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5062"
+      },
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "Now listening on:\\s+(https?://\\S+)",
+        "uriFormat": "%s/swagger"
+      }
+    },
+    {
+      // Fallback for when the Aspire extension is unavailable: start the stack
+      // however you like, then run this and pick Api from the process list.
+      "name": "Attach to Api (fallback)",
+      "type": "coreclr",
+      "request": "attach",
+      "processName": "Api"
+    }
+  ]
+}

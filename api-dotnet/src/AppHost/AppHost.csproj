@@ -1,0 +1,20 @@
+<!-- Must match the Aspire CLI / DCP version: the orchestrator refuses to start
+     against an older Aspire.Hosting.AppHost, and Aspire.Hosting.JavaScript
+     tracks the same number. -->
+<Project Sdk="Aspire.AppHost.Sdk/13.4.6">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <UserSecretsId>6a7e8187-067b-45d1-9bb0-87072642ade7</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- AddViteApp + WithBun for the React client. -->
+    <PackageReference Include="Aspire.Hosting.JavaScript" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Api\Api.csproj" />
+  </ItemGroup>
+
+</Project>
