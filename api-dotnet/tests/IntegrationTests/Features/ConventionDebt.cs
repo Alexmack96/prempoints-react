@@ -23,7 +23,6 @@ internal static class ConventionDebt
         ["api/v1/users"] = "No GET /users/{id}; identity is still the username.",
         ["api/v1/seasons"] = "No GET /seasons/{id}.",
         ["api/v1/seasonPeriods"] = "No GET /seasonPeriods/{id}.",
-        ["api/v1/trades"] = "Creates many trades in one call; a single Location does not fit.",
         ["api/v1/seednewseason"] = "An admin action, not a resource collection.",
     };
 
@@ -47,23 +46,13 @@ internal static class ConventionDebt
     /// <summary>
     /// Writes reachable without authentication.
     /// <para>
-    /// Every one of these changes game state — submitting trades, reseeding a
-    /// season, enrolling teams — and every one is currently open to anyone who
-    /// can reach the host. This is the oldest and largest debt in the file, and
-    /// unlike the others it is a security decision rather than a shape one:
-    /// closing an entry means deciding which policy guards it, not just moving
-    /// code around.
+    /// Closed, and deliberately kept empty rather than deleted. Every entry
+    /// that was here changed game state — reseeding a season, enrolling teams,
+    /// reclassifying trades — and all seven now require
+    /// <see cref="Api.Domain.Authorization.Policies.Admin"/>. An empty list
+    /// keeps <c>WritesRequireAuthorization</c> enforcing with no exemptions,
+    /// and makes adding one an obvious, deliberate act rather than an omission.
     /// </para>
     /// </summary>
-    public static readonly Dictionary<string, string> AnonymousWrite = new(StringComparer.Ordinal)
-    {
-        ["api/v1/trades"] = "Anyone can submit trades, for any user. Needs the caller's identity at minimum.",
-        ["api/v1/trades/type"] = "Bulk-reclassifies trades. Almost certainly Admin.",
-        ["api/v1/seednewseason"] = "Reseeds an entire season. Admin.",
-        ["api/v1/seasons"] = "Creates a season. Admin.",
-        ["api/v1/seasonPeriods"] = "Creates a gameweek. Admin.",
-        ["api/v1/teams/activate/{teamName}"] = "Enrols a team in a season. Admin.",
-        ["api/v1/users/activate/{username}"] = "Admin, or self-service for the named user only.",
-        ["api/v1/users/deactivate/{username}"] = "Admin, or self-service for the named user only.",
-    };
+    public static readonly Dictionary<string, string> AnonymousWrite = new(StringComparer.Ordinal);
 }

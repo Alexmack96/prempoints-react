@@ -1,0 +1,20 @@
+﻿{
+  Status: 422 Unprocessable Entity,
+  Content: {
+    Headers: {
+      Content-Length: 263,
+      Content-Type: application/problem+json
+    },
+    Value: {
+      type: https://tools.ietf.org/html/rfc4918#section-11.2,
+      title: One or more validation errors occurred.,
+      status: 422,
+      errors: {
+        Prices[0].Ask: [
+          Ask must be greater than or equal to Bid.
+        ]
+      },
+      traceId: {Scrubbed}
+    }
+  }
+}

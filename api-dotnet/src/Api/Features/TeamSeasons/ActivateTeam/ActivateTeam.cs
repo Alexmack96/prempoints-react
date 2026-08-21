@@ -1,7 +1,7 @@
-﻿using Api.Infrastructure.Endpoints;
+﻿using Api.Domain.Authorization;
+using Api.Infrastructure.Endpoints;
 using Api.Infrastructure.Endpoints.Filters;
 using Ardalis.Result;
-using Ardalis.Result.AspNetCore;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -29,6 +29,10 @@ public static class ActivateTeam
                .WithName("ActivateTeam")
                .Produces<TeamSeasonDto>(StatusCodes.Status200OK)
                .ProducesProblem(StatusCodes.Status404NotFound)
+               // Enrols a club in a season, which puts it on everyone's board.
+               .RequireAuthorization(Policies.Admin)
+               .ProducesProblem(StatusCodes.Status401Unauthorized)
+               .ProducesProblem(StatusCodes.Status403Forbidden)
                .WithTags("TeamSeasons").WithValidation<Request>();
         }
 
@@ -41,7 +45,7 @@ public static class ActivateTeam
 
             var result = await sender.Send(command);
 
-            return result.ToMinimalApiResult();
+            return result.ToApiResult();
         }
     }
 }

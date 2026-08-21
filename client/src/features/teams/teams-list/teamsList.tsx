@@ -4,7 +4,7 @@ import { useTeamsList } from './useTeamsList';
 
 export const TeamsList = () => {
   const queryClient = useQueryClient();
-  const { data, isLoading } = useTeamsList();
+  const { isLoading } = useTeamsList();
 
   const handleCancel = () => {
     // This triggers the signal.aborted = true

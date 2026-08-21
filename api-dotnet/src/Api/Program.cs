@@ -1,4 +1,7 @@
 using Api.Infrastructure;
+using Api.Infrastructure.EntityFramework;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore;
 using Api.Infrastructure.Endpoints;
 using ServiceDefaults;
 
@@ -15,6 +18,30 @@ var app = builder.Build();
 
 // 3. Request Pipeline (Middleware Order Matters!)
 app.Logger.LogInformation("--- PREMPOINTS API STARTING UP ---");
+
+// Before anything else: Railway terminates TLS at its edge and forwards plain
+// HTTP, so without this the app believes every request arrived insecure.
+// UseHttpsRedirection here instead would redirect a request that already came
+// in over HTTPS, and keep redirecting it.
+var forwardedHeaders = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+};
+
+// The reason the headers above are honoured at all. KnownNetworks and
+// KnownProxies default to loopback, so a header arriving from any other address
+// is dropped — which on Railway is every header, since its edge is not on
+// localhost. The app would then still read the request as HTTP, and
+// UseHttpsRedirection below would bounce it back to a URL the edge forwards as
+// HTTP again: a redirect loop, on every request, in production only.
+//
+// Clearing both means trusting whatever sits in front of us. That is sound
+// here because nothing reaches the container except through Railway's proxy;
+// it stops being sound the moment the app is exposed directly.
+forwardedHeaders.KnownNetworks.Clear();
+forwardedHeaders.KnownProxies.Clear();
+
+app.UseForwardedHeaders(forwardedHeaders);
 
 app.UseExceptionHandler(); // Always first
 
@@ -67,6 +94,13 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+// The published image puts the built React app in wwwroot, so one container
+// serves both halves: same origin, no CORS, one thing to deploy and one URL to
+// hand out. Served before authentication so the login page can load its own
+// assets.
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter(); // Apply limits after we know who the user is
@@ -90,5 +124,21 @@ app.MapFeatureEndpoints(
 // /alive and /health, deliberately outside the "api" prefix: they are host
 // concerns, and the Aspire dashboard probes /alive by absolute path.
 app.MapDefaultEndpoints();
+
+// Client-side routing: anything that is not an API route and not a real file on
+// disk belongs to the React router, so hand it index.html and let the browser
+// decide. Declared last so it can never shadow a real endpoint.
+app.MapFallbackToFile("index.html");
+
+// Migrate on start. A single container has no separate migration step, and the
+// alternative — remembering to run dotnet ef against production by hand — is
+// exactly the thing that gets forgotten. Safe while one instance runs; this
+// needs revisiting before scaling out, because concurrent migrators race.
+if (!app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var database = scope.ServiceProvider.GetRequiredService<PremPointsDbContext>();
+    await database.Database.MigrateAsync();
+}
 
 await app.RunAsync();

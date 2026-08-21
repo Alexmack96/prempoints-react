@@ -33,7 +33,7 @@ public class DeactivateUserTests : BaseIntegrationTest
         var seasonPeriod = await DataSeeder.GetSeasonPeriodAsync(context, 1, 2025);
         var team = await DataSeeder.GetTeamAsync(context, "Chelsea");
 
-        var newPrice = new PriceEntity { Id = Guid.CreateVersion7(), Price = 40, ValueDate = asAtDate, Team = team, SeasonPeriod = seasonPeriod };
+        var newPrice = new PriceEntity { Id = Guid.CreateVersion7(), Bid = 39.5m, Ask = 40.5m, ValueDate = asAtDate, Team = team, SeasonPeriod = seasonPeriod };
         context.Prices.Add(newPrice);
 
         var newUser = new UserEntity { Id = Guid.CreateVersion7(), WorkOSUserId = "user_1", Username = "TEST", FirstName = "TEST", LastName = "TEST", Email = "TEST@TEST.COM", Role = UserRole.Standard };
@@ -75,7 +75,7 @@ public class DeactivateUserTests : BaseIntegrationTest
         var uri = endpoint.AddQueryString(parameters);
 
         //Act
-        var response = await HttpClient.PostAsJsonAsync(uri, request, ct);
+        var response = await AsAdmin().PostAsJsonAsync(uri, request, ct);
 
         //Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);

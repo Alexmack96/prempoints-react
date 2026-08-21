@@ -51,6 +51,21 @@ public class PremPointsDbContext : DbContext
             entity.Property(x => x.TeamName).IsRequired();
             entity.HasIndex(e => new { e.TeamName }).IsUnique();
         });
+        modelBuilder.Entity<PriceEntity>(entity =>
+        {
+            entity.Property(x => x.Bid).HasPrecision(18, 2).IsRequired();
+            entity.Property(x => x.Ask).HasPrecision(18, 2).IsRequired();
+
+            // Computed and stored by SQL Server, so the mid cannot drift from
+            // the spread it comes from and can still be filtered and ordered on.
+            entity.Property(x => x.Mid)
+                  .HasPrecision(18, 4)
+                  .HasComputedColumnSql("(([Bid] + [Ask]) / 2.0)", stored: true);
+
+            // One price per team per value date. The upsert in CreatePriceHandler
+            // relies on this being true.
+            entity.HasIndex(e => new { e.TeamId, e.ValueDate }).IsUnique();
+        });
         modelBuilder.Entity<TradeEntity>(entity =>
         {
             entity.Property(x => x.PriceId).IsRequired();

@@ -25,6 +25,20 @@ public static class ResultExtensions
     }
 
     /// <summary>
+    /// Maps a successful valueless <see cref="Result"/> to <c>200 OK</c> with no
+    /// body, and every other status to the same problem shape the generic
+    /// overload produces.
+    /// </summary>
+    public static IResult ToApiResult(this Result result)
+    {
+        ArgumentNullException.ThrowIfNull(result);
+
+        return result.Status == ResultStatus.Ok
+            ? Results.Ok()
+            : Problem(result.Status, result.Errors, result.ValidationErrors);
+    }
+
+    /// <summary>
     /// Maps success to <c>204 No Content</c>. A delete that succeeded has
     /// nothing to say, and a 200 with an empty body invites clients to parse one.
     /// </summary>

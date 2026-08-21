@@ -1,4 +1,5 @@
 ﻿using Api.Domain.Entities;
+using Api.Features.SeasonPeriods;
 using Api.Features.Users;
 using Api.Infrastructure.EntityFramework;
 using Ardalis.Result;
@@ -13,11 +14,29 @@ public class CreateTradesHandler(PremPointsDbContext context, TimeProvider clock
     public async Task<Result<List<TradeDto>>> Handle(Command command, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
-        var user = await UserQueries.GetByUsernameAsync(context, command.Username, cancellationToken);
+        var user = await UserQueries.GetByWorkOSIdAsync(context, command.WorkOsUserId, cancellationToken);
         if (user is null)
-            return Result.NotFound($"User '{command.Username}' not found.");
+        {
+            // Authenticated with WorkOS but not a player here yet.
+            return Result.NotFound("You are signed in but do not have a PremPoints account yet.");
+        }
 
         var valueDate = DateOnly.FromDateTime(command.TradeDateUtc);
+
+        var seasonPeriod = await SeasonPeriodQueries.GetCurrent(context, valueDate, cancellationToken);
+        if (seasonPeriod is null)
+        {
+            return Result.NotFound($"{valueDate:yyyy-MM-dd} does not sit in a valid season period.");
+        }
+
+        // Checked before anything is written, so a rejected joker leaves no
+        // half-applied submission behind.
+        var jokerRefusal = await CheckJokerAllowanceAsync(command, user.Id, seasonPeriod.SeasonId, cancellationToken);
+        if (jokerRefusal is not null)
+        {
+            return jokerRefusal;
+        }
+
         var requestedTeamNames = command.ExposuresByTeam.Keys.ToList();
 
         var teams = await context.Teams
@@ -44,8 +63,22 @@ public class CreateTradesHandler(PremPointsDbContext context, TimeProvider clock
             var teamName = exposureByTeam.Key;
             var exposure = exposureByTeam.Value;
 
-            var team = teams[teamName.ToUpperInvariant()];
-            var price = pricesByTeamName[teamName.ToUpperInvariant()];
+            // Looked up rather than indexed. Both of these were bare indexer
+            // reads, so a team the caller invented — or, far more likely, a real
+            // team with no price loaded for that date — threw
+            // KeyNotFoundException and reached the client as a 500 saying
+            // nothing. Missing prices are an ordinary operational state at the
+            // start of a gameweek, not a server fault.
+            if (!teams.TryGetValue(teamName.ToUpperInvariant(), out var team))
+            {
+                return Result.NotFound($"Team '{teamName}' does not exist.");
+            }
+
+            if (!pricesByTeamName.TryGetValue(teamName.ToUpperInvariant(), out var price))
+            {
+                return Result.NotFound(
+                    $"No price for '{teamName}' on {valueDate:yyyy-MM-dd}. Prices must be loaded before trades can be placed.");
+            }
 
             var existingTrade = existingTrades.FirstOrDefault(t => t.TeamId == team.Id);
             if (existingTrade is not null)
@@ -55,6 +88,9 @@ public class CreateTradesHandler(PremPointsDbContext context, TimeProvider clock
                 existingTrade.PriceId = price.Id;
                 existingTrade.Price = price;
                 existingTrade.TimezoneIana = command.TimezoneIana;
+                // Was missing, so re-submitting with the joker on kept the
+                // original Standard and the multiplier silently never applied.
+                existingTrade.TradeType = command.TradeType;
                 // Track for return
                 keptTradeIds.Add(existingTrade.Id);
                 resultEntities.Add(existingTrade);
@@ -92,4 +128,39 @@ public class CreateTradesHandler(PremPointsDbContext context, TimeProvider clock
 
         return resultEntities.ToDtos();
     }
+    /// <summary>
+    /// Refuses a second joker in the same season and calendar year, or null if
+    /// the joker is allowed.
+    /// <para>
+    /// The allowance is one joker per calendar year <em>within a season</em>.
+    /// A season straddles New Year, so that works out at two per season — one
+    /// before Christmas and one after. Scoping it to the season as well as the
+    /// year is what lets January 2026 and November 2026 both be jokers: same
+    /// calendar year, but 2025/26 and 2026/27 respectively.
+    /// </para>
+    /// </summary>
+    private async Task<Result<List<TradeDto>>?> CheckJokerAllowanceAsync(
+        Command command,
+        Guid userId,
+        Guid seasonId,
+        CancellationToken cancellationToken)
+    {
+        if (command.TradeType != TradeType.Joker)
+        {
+            return null;
+        }
+
+        var blockedBy = await JokerQueries.FindBlockingJokerAsync(
+            context, userId, seasonId, command.TradeDateUtc, cancellationToken);
+
+        if (blockedBy is null)
+        {
+            return null;
+        }
+
+        return Result.Conflict(
+            $"You have already played your joker for {command.TradeDateUtc.Year} this season, " +
+            $"on {blockedBy:yyyy-MM-dd}. You get one per calendar year within a season.");
+    }
+
 }

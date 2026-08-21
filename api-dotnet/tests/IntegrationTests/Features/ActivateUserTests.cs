@@ -48,7 +48,7 @@ public class ActivateUserTests : BaseIntegrationTest
         var uri = endpoint.AddQueryString(parameters);
 
         //Act
-        var response = await HttpClient.PostAsJsonAsync(uri, request, ct);
+        var response = await AsAdmin().PostAsJsonAsync(uri, request, ct);
 
         //Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);

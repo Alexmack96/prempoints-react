@@ -13,9 +13,8 @@ public class CreatePriceTests : BaseIntegrationTest
     {
         var ct = TestContext.Current.CancellationToken;
         var teamName = "Chelsea";
-        var price = 40;
         var valueDate = new DateOnly(2025, 08, 15);
-        var request = new CreatePrice.Request(teamName, price, valueDate);
+        var request = new CreatePrice.Request(teamName, Bid: 39.5m, Ask: 40.5m, valueDate);
 
         var response = await AsAdmin().PostAsJsonAsync("/api/v1/prices", request, ct);
 
@@ -24,7 +23,10 @@ public class CreatePriceTests : BaseIntegrationTest
         var result = await response.Content.ReadFromJsonAsync<PriceDto>(ct);
 
         Assert.NotNull(result);
-        Assert.Equal(40, result.Price);
+        Assert.Equal(39.5m, result.Bid);
+        Assert.Equal(40.5m, result.Ask);
+        // Computed by SQL Server from the spread, not sent in by the caller.
+        Assert.Equal(40m, result.Mid);
     }
 
     [Fact]
@@ -32,9 +34,8 @@ public class CreatePriceTests : BaseIntegrationTest
     {
         var ct = TestContext.Current.CancellationToken;
         var teamName = "NOT_Chelsea";
-        var price = 40;
         var valueDate = new DateOnly(2025, 08, 15);
-        var request = new CreatePrice.Request(teamName, price, valueDate);
+        var request = new CreatePrice.Request(teamName, Bid: 39.5m, Ask: 40.5m, valueDate);
 
         var response = await AsAdmin().PostAsJsonAsync("/api/v1/prices", request, ct);
 

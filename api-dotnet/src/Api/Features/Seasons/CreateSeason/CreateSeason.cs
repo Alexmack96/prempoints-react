@@ -1,6 +1,6 @@
-﻿using Api.Infrastructure.Endpoints;
+﻿using Api.Domain.Authorization;
+using Api.Infrastructure.Endpoints;
 using Ardalis.Result;
-using Ardalis.Result.AspNetCore;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -29,6 +29,10 @@ public static class CreateSeason
                .WithName("CreateSeason")
                .Produces<SeasonDto>(StatusCodes.Status200OK)
                .ProducesProblem(StatusCodes.Status409Conflict)
+               // A season is the container every trade, price and standing hangs off.
+               .RequireAuthorization(Policies.Admin)
+               .ProducesProblem(StatusCodes.Status401Unauthorized)
+               .ProducesProblem(StatusCodes.Status403Forbidden)
                .WithTags("Seasons");
         }
 
@@ -45,7 +49,7 @@ public static class CreateSeason
                 return Results.Created($"/seasons/{result.Value.Id}", result.Value);
             }
 
-            return result.ToMinimalApiResult();
+            return result.ToApiResult();
         }
     }
 }

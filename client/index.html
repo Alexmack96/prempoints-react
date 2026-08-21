@@ -4,7 +4,30 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>prempoints-react</title>
+    <meta name="description" content="PremPoints 2025/26 — long or short the Premier League." />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <title>PremPoints 2025/26</title>
+    <script>
+      // Applied before first paint, so a dark-theme player never gets a white
+      // flash while React boots. ThemeProvider owns it from then on.
+      (function () {
+        try {
+          var stored = localStorage.getItem('prempoints.theme');
+          var dark = stored
+            ? stored === 'dark'
+            : !matchMedia('(prefers-color-scheme: light)').matches;
+          if (dark) document.documentElement.classList.add('dark');
+        } catch (e) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

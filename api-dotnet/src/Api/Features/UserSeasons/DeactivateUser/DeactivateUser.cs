@@ -1,7 +1,7 @@
-﻿using Api.Infrastructure.Endpoints;
+﻿using Api.Domain.Authorization;
+using Api.Infrastructure.Endpoints;
 using Api.Infrastructure.Endpoints.Filters;
 using Ardalis.Result;
-using Ardalis.Result.AspNetCore;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -29,6 +29,10 @@ public static class DeactivateUser
                .WithName("DeactivateUser")
                .Produces(StatusCodes.Status200OK)
                .ProducesProblem(StatusCodes.Status404NotFound)
+               // Removes another player from the season.
+               .RequireAuthorization(Policies.Admin)
+               .ProducesProblem(StatusCodes.Status401Unauthorized)
+               .ProducesProblem(StatusCodes.Status403Forbidden)
                .WithTags("UserSeasons").WithValidation<Request>();
         }
 
@@ -42,7 +46,7 @@ public static class DeactivateUser
 
             var response = await sender.Send(command, ct);
 
-            return response.ToMinimalApiResult();
+            return response.ToApiResult();
         }
     }
 }

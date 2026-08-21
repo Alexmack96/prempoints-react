@@ -28,7 +28,8 @@ public class CreatePriceHandler(PremPointsDbContext context, TimeProvider clock)
             .SingleOrDefaultAsync(pr => pr.ValueDate == command.ValueDate && pr.TeamId == team.Id, cancellationToken);
         if (existingPrice is not null)
         {
-            existingPrice.Price = command.Price;
+            existingPrice.Bid = command.Bid;
+            existingPrice.Ask = command.Ask;
             existingPrice.SeasonPeriodId = currentSeasonPeriod.Id;
         }
         else
@@ -38,7 +39,8 @@ public class CreatePriceHandler(PremPointsDbContext context, TimeProvider clock)
                 Id = Guid.CreateVersion7(clock.GetUtcNow()),
                 TeamId = team.Id,
                 SeasonPeriodId = currentSeasonPeriod.Id,
-                Price = command.Price,
+                Bid = command.Bid,
+                Ask = command.Ask,
                 ValueDate = command.ValueDate,
                 PriceType = CalculatePriceType(currentSeasonPeriod.PeriodEndDate, command.ValueDate)
             };

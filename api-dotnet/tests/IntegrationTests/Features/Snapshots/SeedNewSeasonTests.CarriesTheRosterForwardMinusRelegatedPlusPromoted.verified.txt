@@ -1,0 +1,40 @@
+﻿{
+  Status: 200 OK,
+  Content: {
+    Headers: {
+      Content-Length: 423,
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      seasonId: Guid_1,
+      seasonName: PremPoints 2027/28,
+      startYear: 2027,
+      gameweeksCreated: 42,
+      teamsCreated: [
+        Wrexham
+      ],
+      teamsEnrolled: [
+        Arsenal,
+        Aston Villa,
+        Bournemouth,
+        Brentford,
+        Brighton,
+        Chelsea,
+        Coventry,
+        Crystal Palace,
+        Everton,
+        Fulham,
+        Hull,
+        Ipswich,
+        Leeds United,
+        Liverpool,
+        Manchester City,
+        Manchester United,
+        Newcastle,
+        Nottingham Forest,
+        Tottenham,
+        Wrexham
+      ]
+    }
+  }
+}

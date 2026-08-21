@@ -1,0 +1,9 @@
+**/node_modules/
+**/bin/
+**/obj/
+client/dist/
+.git/
+.vscode/
+.idea/
+**/*.user
+**/.DS_Store

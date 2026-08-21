@@ -197,19 +197,68 @@ public static class ServiceCollectionExtensions
         });
     }
 
+    /// <summary>
+    /// The default budget: 120 requests a minute, per caller.
+    /// <para>
+    /// Per caller is the whole point. <c>AddFixedWindowLimiter</c> builds one
+    /// limiter shared by every request using the policy, so the budget was
+    /// global — a dozen players on a Saturday afternoon would have spent each
+    /// other's allowance and 429'd one another, and one impatient client could
+    /// have locked out the league. Partitioning gives each caller their own
+    /// window, which is what the number was always meant to describe.
+    /// </para>
+    /// <para>
+    /// Identity first, address second: signed-in players are told apart even
+    /// when several sit behind one office NAT, and an anonymous caller still
+    /// gets a bounded share. The limiter is per instance, so this is a courtesy
+    /// limit rather than a defence against a distributed flood — that belongs
+    /// at the edge.
+    /// </para>
+    /// </summary>
     private static IServiceCollection AddCustomRateLimiting(this IServiceCollection services)
     {
         return services.AddRateLimiter(options =>
         {
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-            options.AddFixedWindowLimiter("DefaultPolicy", opt =>
-            {
-                opt.PermitLimit = 120;
-                opt.Window = TimeSpan.FromSeconds(60);
-                opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-                opt.QueueLimit = 0;
-            });
+
+            options.AddPolicy("DefaultPolicy", httpContext =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    PartitionKeyFor(httpContext),
+                    _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 120,
+                        Window = TimeSpan.FromSeconds(60),
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                        QueueLimit = 0,
+                    }));
         });
+    }
+
+    /// <summary>
+    /// Who to charge a request to. The internal user id when we have one, the
+    /// WorkOS subject when the token validated but the row is missing, and the
+    /// remote address otherwise. The final fallback is a shared bucket: an
+    /// unknown caller with no address should still not be unlimited.
+    /// </summary>
+    private static string PartitionKeyFor(HttpContext httpContext)
+    {
+        var user = httpContext.User;
+
+        var internalUserId = user.FindFirst("InternalUserId")?.Value;
+        if (!string.IsNullOrEmpty(internalUserId))
+        {
+            return $"user:{internalUserId}";
+        }
+
+        var externalId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!string.IsNullOrEmpty(externalId))
+        {
+            return $"workos:{externalId}";
+        }
+
+        var address = httpContext.Connection.RemoteIpAddress;
+
+        return address is null ? "anonymous" : $"ip:{address}";
     }
 
     private static IServiceCollection AddCustomCors(this IServiceCollection services, IConfiguration config)

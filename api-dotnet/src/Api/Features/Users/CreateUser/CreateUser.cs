@@ -3,7 +3,6 @@ using Api.Features.Teams;
 using Api.Infrastructure.Endpoints;
 using Api.Infrastructure.Endpoints.Filters;
 using Ardalis.Result;
-using Ardalis.Result.AspNetCore;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -50,12 +49,12 @@ public static class CreateUser
 
             var workOSUserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(workOSUserId))
-                return Result.Forbidden("User identity could not be verified.").ToMinimalApiResult();
+                return Result.Forbidden("User identity could not be verified.").ToApiResult();
 
             var command = new Command(workOSUserId, request.Username, request.FirstName, request.LastName, request.Email, request.Role);
             var result = await sender.Send(command, ct);
 
-            return result.ToMinimalApiResult();
+            return result.ToApiResult();
         }
     }
 }

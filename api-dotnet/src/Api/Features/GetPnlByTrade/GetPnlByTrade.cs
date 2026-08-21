@@ -3,7 +3,6 @@ using Api.Features.Teams;
 using Api.Infrastructure.Endpoints;
 using Api.Infrastructure.Endpoints.Filters;
 using Ardalis.Result;
-using Ardalis.Result.AspNetCore;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -49,7 +48,7 @@ public static class GetPnlByTrade
 
             var result = await sender.Send(query, ct);
 
-            return result.ToMinimalApiResult();
+            return result.ToApiResult();
         }
     }
 }

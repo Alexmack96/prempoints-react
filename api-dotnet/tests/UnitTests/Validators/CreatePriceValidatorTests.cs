@@ -10,7 +10,7 @@ public class CreatePriceValidatorTests
     [Fact]
     public void CreateTeam_ShouldHaveNoError_WhenValid()
     {
-        var request = new CreatePrice.Request("Arsenal", 69, new DateOnly(2025, 08, 15));
+        var request = new CreatePrice.Request("Arsenal", Bid: 68m, Ask: 70m, new DateOnly(2025, 08, 15));
 
         var result = _validator.TestValidate(request);
 
@@ -23,7 +23,7 @@ public class CreatePriceValidatorTests
     [InlineData(" ")]
     public void TeamName_ShouldHaveError_WhenEmpty(string? value)
     {
-        var request = new CreatePrice.Request(value!, 69, new DateOnly(2025, 08, 15));
+        var request = new CreatePrice.Request(value!, Bid: 68m, Ask: 70m, new DateOnly(2025, 08, 15));
 
         var result = _validator.TestValidate(request);
 
@@ -31,12 +31,24 @@ public class CreatePriceValidatorTests
     }
 
     [Fact]
-    public void Price_ShouldHaveError_WhenNegative()
+    public void Bid_ShouldHaveError_WhenNegative()
     {
-        var request = new CreatePrice.Request("Arsenal", -1, new DateOnly(2025, 08, 15));
+        var request = new CreatePrice.Request("Arsenal", Bid: -1m, Ask: 70m, new DateOnly(2025, 08, 15));
 
         var result = _validator.TestValidate(request);
 
-        result.ShouldHaveValidationErrorFor(x => x.Price);
+        result.ShouldHaveValidationErrorFor(x => x.Bid);
+    }
+
+    [Fact]
+    public void Ask_ShouldHaveError_WhenBelowBid()
+    {
+        // An inverted spread would put the mid somewhere neither side agreed to
+        // and let a player buy below the sell price.
+        var request = new CreatePrice.Request("Arsenal", Bid: 70m, Ask: 68m, new DateOnly(2025, 08, 15));
+
+        var result = _validator.TestValidate(request);
+
+        result.ShouldHaveValidationErrorFor(x => x.Ask);
     }
 }

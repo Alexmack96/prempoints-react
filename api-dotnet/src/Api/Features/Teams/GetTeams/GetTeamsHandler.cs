@@ -8,7 +8,7 @@ using static Api.Features.Teams.GetTeams.GetTeams;
 
 namespace Api.Features.Teams.GetTeams;
 
-public class GetTeamsHandler(PremPointsDbContext context, TimeProvider clock)
+public class GetTeamsHandler(PremPointsDbContext context)
     : IRequestHandler<Query, Result<PagedResponse<TeamDto>>>
 {
     public async Task<Result<PagedResponse<TeamDto>>> Handle(Query query, CancellationToken cancellationToken)

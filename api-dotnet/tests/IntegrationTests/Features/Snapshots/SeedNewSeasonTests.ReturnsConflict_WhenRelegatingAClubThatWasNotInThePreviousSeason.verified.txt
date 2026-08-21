@@ -1,0 +1,16 @@
+﻿{
+  Status: 409 Conflict,
+  Content: {
+    Headers: {
+      Content-Length: 272,
+      Content-Type: application/problem+json
+    },
+    Value: {
+      type: https://tools.ietf.org/html/rfc9110#section-15.5.10,
+      title: Conflict,
+      status: 409,
+      detail: These clubs cannot be relegated because they were not in the PremPoints 2025/26 season: Sundrland.,
+      traceId: {Scrubbed}
+    }
+  }
+}

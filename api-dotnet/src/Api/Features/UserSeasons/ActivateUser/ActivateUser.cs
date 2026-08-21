@@ -1,7 +1,7 @@
-﻿using Api.Infrastructure.Endpoints;
+﻿using Api.Domain.Authorization;
+using Api.Infrastructure.Endpoints;
 using Api.Infrastructure.Endpoints.Filters;
 using Ardalis.Result;
-using Ardalis.Result.AspNetCore;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -30,6 +30,10 @@ public static class ActivateUser
                .WithName("ActivateUser")
                .Produces<UserSeasonDto>(StatusCodes.Status200OK)
                .ProducesProblem(StatusCodes.Status404NotFound)
+               // Enrols another player and sets their late-joiner fee.
+               .RequireAuthorization(Policies.Admin)
+               .ProducesProblem(StatusCodes.Status401Unauthorized)
+               .ProducesProblem(StatusCodes.Status403Forbidden)
                .WithTags("UserSeasons").WithValidation<Request>();
         }
 
@@ -43,7 +47,7 @@ public static class ActivateUser
 
             var result = await sender.Send(command, ct);
 
-            return result.ToMinimalApiResult();
+            return result.ToApiResult();
         }
     }
 }

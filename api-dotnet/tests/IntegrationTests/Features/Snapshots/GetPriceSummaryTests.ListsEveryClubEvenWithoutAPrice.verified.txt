@@ -1,0 +1,237 @@
+﻿{
+  Status: 200 OK,
+  Content: {
+    Headers: {
+      Content-Length: 3683,
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      items: [
+        {
+          teamId: Guid_1,
+          teamName: Arsenal,
+          bid: null,
+          ask: null,
+          mid: null,
+          valueDate: null,
+          priceType: null,
+          previousMid: null,
+          movement: Unknown
+        },
+        {
+          teamId: Guid_2,
+          teamName: Aston Villa,
+          bid: null,
+          ask: null,
+          mid: null,
+          valueDate: null,
+          priceType: null,
+          previousMid: null,
+          movement: Unknown
+        },
+        {
+          teamId: Guid_3,
+          teamName: Bournemouth,
+          bid: null,
+          ask: null,
+          mid: null,
+          valueDate: null,
+          priceType: null,
+          previousMid: null,
+          movement: Unknown
+        },
+        {
+          teamId: Guid_4,
+          teamName: Brentford,
+          bid: null,
+          ask: null,
+          mid: null,
+          valueDate: null,
+          priceType: null,
+          previousMid: null,
+          movement: Unknown
+        },
+        {
+          teamId: Guid_5,
+          teamName: Brighton,
+          bid: null,
+          ask: null,
+          mid: null,
+          valueDate: null,
+          priceType: null,
+          previousMid: null,
+          movement: Unknown
+        },
+        {
+          teamId: Guid_6,
+          teamName: Chelsea,
+          bid: null,
+          ask: null,
+          mid: null,
+          valueDate: null,
+          priceType: null,
+          previousMid: null,
+          movement: Unknown
+        },
+        {
+          teamId: Guid_7,
+          teamName: Coventry,
+          bid: null,
+          ask: null,
+          mid: null,
+          valueDate: null,
+          priceType: null,
+          previousMid: null,
+          movement: Unknown
+        },
+        {
+          teamId: Guid_8,
+          teamName: Crystal Palace,
+          bid: null,
+          ask: null,
+          mid: null,
+          valueDate: null,
+          priceType: null,
+          previousMid: null,
+          movement: Unknown
+        },
+        {
+          teamId: Guid_9,
+          teamName: Everton,
+          bid: null,
+          ask: null,
+          mid: null,
+          valueDate: null,
+          priceType: null,
+          previousMid: null,
+          movement: Unknown
+        },
+        {
+          teamId: Guid_10,
+          teamName: Fulham,
+          bid: null,
+          ask: null,
+          mid: null,
+          valueDate: null,
+          priceType: null,
+          previousMid: null,
+          movement: Unknown
+        },
+        {
+          teamId: Guid_11,
+          teamName: Hull,
+          bid: null,
+          ask: null,
+          mid: null,
+          valueDate: null,
+          priceType: null,
+          previousMid: null,
+          movement: Unknown
+        },
+        {
+          teamId: Guid_12,
+          teamName: Ipswich,
+          bid: null,
+          ask: null,
+          mid: null,
+          valueDate: null,
+          priceType: null,
+          previousMid: null,
+          movement: Unknown
+        },
+        {
+          teamId: Guid_13,
+          teamName: Leeds United,
+          bid: null,
+          ask: null,
+          mid: null,
+          valueDate: null,
+          priceType: null,
+          previousMid: null,
+          movement: Unknown
+        },
+        {
+          teamId: Guid_14,
+          teamName: Liverpool,
+          bid: null,
+          ask: null,
+          mid: null,
+          valueDate: null,
+          priceType: null,
+          previousMid: null,
+          movement: Unknown
+        },
+        {
+          teamId: Guid_15,
+          teamName: Manchester City,
+          bid: null,
+          ask: null,
+          mid: null,
+          valueDate: null,
+          priceType: null,
+          previousMid: null,
+          movement: Unknown
+        },
+        {
+          teamId: Guid_16,
+          teamName: Manchester United,
+          bid: null,
+          ask: null,
+          mid: null,
+          valueDate: null,
+          priceType: null,
+          previousMid: null,
+          movement: Unknown
+        },
+        {
+          teamId: Guid_17,
+          teamName: Newcastle,
+          bid: null,
+          ask: null,
+          mid: null,
+          valueDate: null,
+          priceType: null,
+          previousMid: null,
+          movement: Unknown
+        },
+        {
+          teamId: Guid_18,
+          teamName: Nottingham Forest,
+          bid: null,
+          ask: null,
+          mid: null,
+          valueDate: null,
+          priceType: null,
+          previousMid: null,
+          movement: Unknown
+        },
+        {
+          teamId: Guid_19,
+          teamName: Sunderland,
+          bid: null,
+          ask: null,
+          mid: null,
+          valueDate: null,
+          priceType: null,
+          previousMid: null,
+          movement: Unknown
+        },
+        {
+          teamId: Guid_20,
+          teamName: Tottenham,
+          bid: null,
+          ask: null,
+          mid: null,
+          valueDate: null,
+          priceType: null,
+          previousMid: null,
+          movement: Unknown
+        }
+      ],
+      page: 1,
+      pageSize: 100,
+      totalCount: 20,
+      totalPages: 1
+    }
+  }
+}

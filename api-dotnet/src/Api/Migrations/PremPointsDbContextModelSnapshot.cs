@@ -28,6 +28,14 @@ namespace Api.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("PriceId");
 
+                    b.Property<decimal>("Ask")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Bid")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("datetime2");
 
@@ -40,8 +48,11 @@ namespace Api.Migrations
                     b.Property<DateTime>("LastModifiedUtc")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<decimal>("Mid")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)")
+                        .HasComputedColumnSql("(([Bid] + [Ask]) / 2.0)", true);
 
                     b.Property<int>("PriceType")
                         .HasColumnType("int");
@@ -59,7 +70,8 @@ namespace Api.Migrations
 
                     b.HasIndex("SeasonPeriodId");
 
-                    b.HasIndex("TeamId");
+                    b.HasIndex("TeamId", "ValueDate")
+                        .IsUnique();
 
                     b.ToTable("Prices");
                 });

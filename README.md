@@ -99,5 +99,86 @@ killed mid-way.
 
 # 2. To Do
 
-[] get to railway prod
+[X] Make the home cards
+[]also on mobile mode, i.e. i tried ctrl+shift+m in my broswer on computer, it should only show one card and a name dropdown selector that flips between themn , and an option to select a second one. quite different from how the web ui is!
+[] Seed prices for the screenshot here, the prices table should have a bid and ask, and we should calculate in the c# model the average as being the price every time, never persist it, redundant. make a mapping where names dont match, seems like only man utd and man city
+[] on mobile, there should just be one nice card and a team selector that flips between the badgfes/names etc. since not enough real estate to show all 20 
+[] display a simple ag-grid with the badges, team name, and price, and current date e.g. today we will seed 20 prices for 21 aug
 [] Create differents service account users per application so they can only access their db and cant drop db etc. only admin can.
+
+# 3. Railway: get to prod
+
+The image and `railway.toml` already exist. What follows is what stands between
+them and a live deployment, worst first.
+
+## 3.1. Blockers
+
+The code-side blockers are closed. What is left needs a Railway dashboard, a
+WorkOS dashboard or a Docker daemon, so none of it can be done from the repo.
+
+[X] **Trust Railway's proxy in `UseForwardedHeaders`.** `KnownNetworks` and
+   `KnownProxies` are now cleared in `Program.cs`. They default to loopback,
+   which meant Railway's `X-Forwarded-Proto` was dropped, the app read every
+   request as HTTP, and `UseHttpsRedirection` bounced it — forever.
+[X] **Close `ConventionDebt.AnonymousWrite`.** All seven writes now require
+   `Policies.Admin`: `seednewseason`, `seasons`, `seasonPeriods`,
+   `teams/activate`, `users/activate`, `users/deactivate`, `trades/type`. The
+   debt list is empty and kept that way, so the rule enforces with no
+   exemptions.
+[X] **Make `POST prices` Admin.** Was merely authenticated, so any signed-in
+   player could move the market they were trading against.
+[X] **Partition the rate limiter.** 120 a minute is now per caller — internal
+   user id, then WorkOS subject, then IP — rather than one global bucket the
+   whole league shared.
+[] **Decide how Railway reaches the database.** Azure SQL is firewalled by IP
+   and Railway's egress IPs are dynamic unless you pay for a static one. Either
+   buy the static egress IP and allowlist it, or move the database to Railway
+   and change the provider. This is the decision the rest of the deploy waits on.
+[] **Set the Railway variables.** `ConnectionStrings__PremPoints` (with
+   `Encrypt=True`), and confirm `ASPNETCORE_ENVIRONMENT=Production` from the
+   image is what you want. `Database__Name` already comes from
+   `appsettings.Production.json`.
+[] **Register the Railway origin with WorkOS.** The client's redirect URI is
+   its own origin, so the deployed URL has to be a registered redirect URI and
+   allowed origin in the WorkOS dashboard, or sign-in fails before the login
+   page. The build-arg half is done: the Dockerfile takes
+   `VITE_WORKOS_CLIENT_ID` and Vite bakes it in, so pass it at build time if
+   production points at a different WorkOS environment. A Railway runtime
+   variable of that name would be read by nothing.
+[] **Build the image once locally before pushing.** It has never been built —
+   there is no Docker on this machine. A first failure inside Railway's build
+   logs is a slow way to find a typo.
+
+## 3.2. Before letting anyone else in
+
+[] `/metrics` is mapped in every environment by `MapDefaultEndpoints`, so
+   Prometheus scraping is public in prod. Gate it, or move it behind a
+   Railway private network.
+[] `ReactQueryDevtools` renders unconditionally in `main.tsx` and ships in the
+   production bundle. Wrap it in `import.meta.env.DEV`.
+[] `Microsoft.OpenApi` 2.3.0 carries a high-severity advisory (GHSA-v5pm-xwqc-g5wc).
+   Bump it in `Directory.Packages.props`.
+[] Pin Railway to one replica. Migrations run at startup, and two instances
+   racing the same migration is how you corrupt a schema. Check migration time
+   against `healthcheckTimeout = 60` too — the app does not listen until they
+   finish.
+[] `AllowedOrigins` in `appsettings.json` still lists `https://my-production-app.com`.
+   Same-origin means CORS is barely exercised, which is exactly why a wrong
+   value here will go unnoticed.
+[] Production logging is `Warning` by default, so an incident leaves you with
+   nothing to read. Decide `Information` for the API's own namespace, and set
+   `OTEL_EXPORTER_OTLP_ENDPOINT` if traces should go anywhere.
+[] Static files are served with no cache headers, so hashed assets are
+   re-fetched every visit.
+
+## 3.3. Cleanup
+
+[] `bun run lint` has never run: `eslint.config.js` extends `reactX` and
+   `reactDom`, neither imported nor installed.
+[] No CI. Nothing runs `dotnet test` or the client build before a deploy.
+[] Unused client dependencies: `ag-grid-community`, `ag-grid-react`,
+   `@headlessui/react`, `postcss`, `autoprefixer`.
+[] `AppSettings:TradingWindow` is read by nothing, and says `America/New_York`
+   for a Premier League game.
+[] Favicon is still `vite.svg`.
+[] Custom domain, if it is not staying on `*.up.railway.app`.

@@ -1,4 +1,8 @@
 import { useState } from 'react';
+import { Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useCreateTeam } from './useCreateTeam';
 
 export const CreateTeamForm = () => {
@@ -22,28 +26,28 @@ export const CreateTeamForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
-      <input
-        type="text"
-        placeholder="Enter team name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        disabled={createTeamMutation.isPending}
-        style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
-      />
+    <form onSubmit={handleSubmit} className="space-y-3">
+      <div className="space-y-2">
+        <Label htmlFor="team-name">Club name</Label>
+        <Input
+          id="team-name"
+          type="text"
+          placeholder="e.g. Nottingham Forest"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          disabled={createTeamMutation.isPending}
+        />
+      </div>
 
-      <button
-        type="submit"
-        disabled={createTeamMutation.isPending}
-        style={{ padding: '8px 16px', cursor: 'pointer' }}
-      >
-        {createTeamMutation.isPending ? 'Creating...' : 'Create Team'}
-      </button>
+      <Button type="submit" className="w-full" disabled={createTeamMutation.isPending || !name}>
+        <Plus className="size-4" />
+        {createTeamMutation.isPending ? 'Creating…' : 'Create club'}
+      </Button>
 
       {createTeamMutation.isError && (
-        <div style={{ color: 'red', marginTop: '8px' }}>
+        <p className="text-destructive text-sm">
           Error creating team: {createTeamMutation.error.message}
-        </div>
+        </p>
       )}
     </form>
   );

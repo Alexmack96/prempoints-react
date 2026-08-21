@@ -1,0 +1,16 @@
+﻿{
+  Status: 409 Conflict,
+  Content: {
+    Headers: {
+      Content-Length: 292,
+      Content-Type: application/problem+json
+    },
+    Value: {
+      type: https://tools.ietf.org/html/rfc9110#section-15.5.10,
+      title: Conflict,
+      status: 409,
+      detail: You have already played your joker for 2025 this season, on 2025-11-10. You get one per calendar year within a season.,
+      traceId: {Scrubbed}
+    }
+  }
+}

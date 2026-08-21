@@ -1,26 +1,214 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
 
-/* @layer components {
-  .btn {
-    @apply inline-flex items-center gap-2 rounded-xl border border-transparent
-           px-4 py-2 text-sm font-medium transition
-           bg-neutral-900 text-white hover:border-indigo-500
-           focus:outline-none focus:ring-2 focus:ring-indigo-500;
+@custom-variant dark (&:is(.dark *));
+
+/*
+  One palette, two themes. Every colour the app draws with is a token here, so a
+  component never names a raw shade — `bg-card`, not `bg-white`. Switching the
+  `dark` class on <html> reskins the whole board without touching a component.
+
+  The hue is pinned around 300 (violet) to match the league's purple, with the
+  pitch green kept for gains and a red kept for losses. Those two are the only
+  colours in the app that carry meaning rather than decoration.
+*/
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Market direction. Named for what they mean, not what they look like. */
+  --color-long: var(--long);
+  --color-long-foreground: var(--long-foreground);
+  --color-long-muted: var(--long-muted);
+  --color-short: var(--short);
+  --color-short-foreground: var(--short-foreground);
+  --color-short-muted: var(--short-muted);
+  --color-joker: var(--joker);
+  --color-joker-foreground: var(--joker-foreground);
+  --color-joker-muted: var(--joker-muted);
+
+  --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono:
+    'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+}
+
+:root {
+  --radius: 0.75rem;
+
+  --background: oklch(0.975 0.006 300);
+  --foreground: oklch(0.22 0.03 300);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0.03 300);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0.03 300);
+
+  --primary: oklch(0.45 0.19 305);
+  --primary-foreground: oklch(0.985 0.01 300);
+  --secondary: oklch(0.955 0.012 300);
+  --secondary-foreground: oklch(0.32 0.06 305);
+  --muted: oklch(0.955 0.012 300);
+  --muted-foreground: oklch(0.52 0.03 300);
+  --accent: oklch(0.94 0.03 305);
+  --accent-foreground: oklch(0.32 0.08 305);
+  --destructive: oklch(0.58 0.22 25);
+  --destructive-foreground: oklch(0.985 0.01 300);
+
+  --border: oklch(0.9 0.015 300);
+  --input: oklch(0.9 0.015 300);
+  --ring: oklch(0.55 0.16 305);
+
+  --long: oklch(0.55 0.15 155);
+  --long-foreground: oklch(0.99 0.02 155);
+  --long-muted: oklch(0.94 0.05 155);
+  --short: oklch(0.55 0.2 22);
+  --short-foreground: oklch(0.99 0.02 22);
+  --short-muted: oklch(0.94 0.05 22);
+  --joker: oklch(0.72 0.16 75);
+  --joker-foreground: oklch(0.25 0.06 75);
+  --joker-muted: oklch(0.95 0.06 85);
+
+  /* The page ground. Three off-centre washes over a base tone, so the backdrop
+     has depth instead of reading as one flat fill. */
+  --glow-a: oklch(0.88 0.09 305 / 0.75);
+  --glow-b: oklch(0.9 0.07 200 / 0.6);
+  --glow-c: oklch(0.93 0.07 340 / 0.55);
+  --grid-line: oklch(0.5 0.05 300 / 0.05);
+}
+
+.dark {
+  --background: oklch(0.17 0.025 295);
+  --foreground: oklch(0.96 0.008 300);
+
+  --card: oklch(0.225 0.028 295);
+  --card-foreground: oklch(0.96 0.008 300);
+  --popover: oklch(0.225 0.028 295);
+  --popover-foreground: oklch(0.96 0.008 300);
+
+  --primary: oklch(0.72 0.17 305);
+  --primary-foreground: oklch(0.17 0.04 300);
+  --secondary: oklch(0.27 0.03 295);
+  --secondary-foreground: oklch(0.95 0.01 300);
+  --muted: oklch(0.27 0.03 295);
+  --muted-foreground: oklch(0.71 0.025 300);
+  --accent: oklch(0.32 0.05 300);
+  --accent-foreground: oklch(0.96 0.01 300);
+  --destructive: oklch(0.65 0.2 22);
+  --destructive-foreground: oklch(0.16 0.03 22);
+
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.6 0.14 305);
+
+  --long: oklch(0.78 0.19 160);
+  --long-foreground: oklch(0.2 0.06 160);
+  --long-muted: oklch(0.32 0.07 160);
+  --short: oklch(0.68 0.19 22);
+  --short-foreground: oklch(0.18 0.05 22);
+  --short-muted: oklch(0.32 0.08 22);
+  --joker: oklch(0.8 0.15 80);
+  --joker-foreground: oklch(0.22 0.06 80);
+  --joker-muted: oklch(0.32 0.07 80);
+
+  --glow-a: oklch(0.45 0.19 305 / 0.42);
+  --glow-b: oklch(0.5 0.13 210 / 0.28);
+  --glow-c: oklch(0.5 0.16 340 / 0.26);
+  --grid-line: oklch(1 0 0 / 0.035);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-  .link {
-    @apply font-medium text-indigo-500 hover:text-indigo-400;
+
+  html {
+    color-scheme: light;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    min-height: 100dvh;
+  }
+
+  /* The washes live on a fixed pseudo-element rather than on body, so they stay
+     put while the board scrolls and never stretch to the document height. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    background:
+      radial-gradient(60rem 40rem at 12% -10%, var(--glow-a), transparent 60%),
+      radial-gradient(50rem 36rem at 88% 0%, var(--glow-b), transparent 62%),
+      radial-gradient(46rem 42rem at 50% 108%, var(--glow-c), transparent 60%);
+  }
+
+  /* A faint pitch grid on top of the washes. Barely legible on purpose — it
+     gives the flat areas texture without becoming a pattern you look at. */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 4rem 4rem;
+    mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, #000 30%, transparent 78%);
+  }
+
+  ::selection {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  /* Scrollbars follow the theme; the default light-grey one is the single most
+     obvious tell that a dark page was themed only halfway. */
+  * {
+    scrollbar-color: var(--border) transparent;
+    scrollbar-width: thin;
   }
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-} */
+@utility glass {
+  background: color-mix(in oklab, var(--card) 72%, transparent);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+}
+
+/* Numbers that change — prices, stakes, totals. Tabular figures stop the row
+   from twitching sideways every time a digit updates. */
+@utility numeric {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}

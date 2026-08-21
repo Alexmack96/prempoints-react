@@ -92,10 +92,16 @@ public class ConventionRulesTests : BaseIntegrationTest
     {
         // A POST to a parameterless resource route creates something, and the
         // caller needs its URL. 200 leaves them to guess it.
+        //
+        // Endpoints answering with a collection are exempt on principle rather
+        // than by exception: a bulk upsert creates many rows and there is no
+        // single Location header that could describe them.
         AssertNone(
             ApiEndpoints()
                 .Where(e => Uses(e, HttpMethods.Post))
                 .Where(e => e.RoutePattern.Parameters.Count == 0)
+                .Where(e => !Declared(e).Any(m =>
+                    m.StatusCode is >= 200 and < 300 && m.Type is not null && IsBareCollection(m.Type)))
                 .Where(e => !ConventionDebt.CreateReturnsOk.ContainsKey(Route(e)))
                 .Where(e => !Declares(e, StatusCodes.Status201Created))
                 .Select(Route),

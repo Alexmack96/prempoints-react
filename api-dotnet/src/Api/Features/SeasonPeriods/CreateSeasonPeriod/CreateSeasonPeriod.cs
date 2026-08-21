@@ -1,6 +1,6 @@
-﻿using Api.Infrastructure.Endpoints;
+﻿using Api.Domain.Authorization;
+using Api.Infrastructure.Endpoints;
 using Ardalis.Result;
-using Ardalis.Result.AspNetCore;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -28,6 +28,10 @@ public static class CreateSeasonPeriod
                .WithName("CreateSeasonPeriod")
                .Produces<SeasonPeriodDto>(StatusCodes.Status200OK)
                .ProducesProblem(StatusCodes.Status404NotFound)
+               // Gameweeks decide which trades settle when.
+               .RequireAuthorization(Policies.Admin)
+               .ProducesProblem(StatusCodes.Status401Unauthorized)
+               .ProducesProblem(StatusCodes.Status403Forbidden)
                .WithTags("SeasonPeriods");
         }
 
@@ -40,7 +44,7 @@ public static class CreateSeasonPeriod
 
             var result = await sender.Send(command, ct);
 
-            return result.ToMinimalApiResult();
+            return result.ToApiResult();
         }
     }
 }

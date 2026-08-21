@@ -1,0 +1,20 @@
+﻿{
+  Status: 422 Unprocessable Entity,
+  Content: {
+    Headers: {
+      Content-Length: 309,
+      Content-Type: application/problem+json
+    },
+    Value: {
+      type: https://tools.ietf.org/html/rfc4918#section-11.2,
+      title: One or more validation errors occurred.,
+      status: 422,
+      errors: {
+        ExposuresByTeam: [
+          Each stake must be between 5 and 40, in multiples of 5. Short positions are negative.
+        ]
+      },
+      traceId: {Scrubbed}
+    }
+  }
+}

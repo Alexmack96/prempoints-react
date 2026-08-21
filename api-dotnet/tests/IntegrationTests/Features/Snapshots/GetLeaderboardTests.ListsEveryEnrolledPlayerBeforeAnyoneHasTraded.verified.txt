@@ -1,0 +1,47 @@
+﻿{
+  Status: 200 OK,
+  Content: {
+    Headers: {
+      Content-Length: 560,
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      items: [
+        {
+          rank: 1,
+          userId: Guid_1,
+          username: Almack,
+          firstName: Alex,
+          lastName: Mackintosh,
+          pnl: 0,
+          tradesPlaced: 0,
+          pnlIsSettled: false
+        },
+        {
+          rank: 1,
+          userId: Guid_2,
+          username: Andy,
+          firstName: Andrew,
+          lastName: Mackintosh,
+          pnl: 0,
+          tradesPlaced: 0,
+          pnlIsSettled: false
+        },
+        {
+          rank: 1,
+          userId: Guid_3,
+          username: KC,
+          firstName: Casey,
+          lastName: Liddy,
+          pnl: 0,
+          tradesPlaced: 0,
+          pnlIsSettled: false
+        }
+      ],
+      page: 1,
+      pageSize: 20,
+      totalCount: 3,
+      totalPages: 1
+    }
+  }
+}

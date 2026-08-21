@@ -1,6 +1,5 @@
 ﻿using Api.Infrastructure.Endpoints;
 using Ardalis.Result;
-using Ardalis.Result.AspNetCore;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -45,7 +44,7 @@ public static class GetUserMe
 
             var result = await sender.Send(query, ct);
 
-            return result.ToMinimalApiResult();
+            return result.ToApiResult();
         }
     }
 }

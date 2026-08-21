@@ -1,101 +1,160 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-// Ideally, swap this absolute path for a relative one (e.g., '../assets/prem_lion.jpg') for better portability
+import { BarChart3, LineChart, LogOut, Menu, Settings, Shield, Trophy, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import { useCurrentUser } from '../auth/useCurrentUser';
 import image_prem_lion from '../../assets/prem_lion.jpg';
+
+/**
+ * The nav and the keyboard shortcuts read from one list, so a route can never
+ * be reachable by Ctrl+Alt+n and missing from the bar, or the other way round.
+ *
+ * `adminOnly` hides an item from players. Hiding is courtesy, not protection —
+ * the route guards itself and the API enforces the role — but a link nobody can
+ * use has no business being in the bar.
+ */
+const NAV_ITEMS = [
+  { to: '/', label: 'Trade', icon: LineChart, shortcut: '1', end: true, adminOnly: false },
+  {
+    to: '/leaderboard',
+    label: 'Leaderboard',
+    icon: Trophy,
+    shortcut: '2',
+    end: false,
+    adminOnly: false,
+  },
+  { to: '/prices', label: 'Prices', icon: BarChart3, shortcut: '3', end: false, adminOnly: false },
+  { to: '/results', label: 'Results', icon: Shield, shortcut: '4', end: false, adminOnly: false },
+  { to: '/admin', label: 'Admin', icon: Settings, shortcut: '5', end: false, adminOnly: true },
+] as const;
+
+const SHORTCUTS: Record<string, string> = {
+  ...Object.fromEntries(NAV_ITEMS.map((item) => [item.shortcut, item.to])),
+  '0': '/logout',
+};
 
 export default function NavBar() {
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const { data: me } = useCurrentUser();
+
+  const isAdmin = me?.role === 'Administrator';
+  const items = NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.altKey) {
-        switch (e.key) {
-          case '1':
-            e.preventDefault(); // Good practice to prevent default browser behavior for shortcuts
-            navigate('/');
-            break;
-          case '2':
-            e.preventDefault();
-            navigate('/leaderboard');
-            break;
-          case '3':
-            e.preventDefault();
-            navigate('/prices');
-            break;
-          case '4':
-            e.preventDefault();
-            navigate('/results');
-            break;
-          case '5':
-            e.preventDefault();
-            navigate('/teams');
-            break;
-          case '0':
-            e.preventDefault();
-            navigate('/logout');
-            break;
-          default:
-            break;
-        }
+      if (!e.ctrlKey || !e.altKey) return;
+
+      const destination = SHORTCUTS[e.key];
+
+      if (destination) {
+        e.preventDefault();
+        navigate(destination);
       }
     };
 
-    // Add event listener
     window.addEventListener('keydown', handleKeyDown);
 
-    // Clean up
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [navigate]);
 
+  const linkClasses = ({ isActive }: { isActive: boolean }) =>
+    cn(
+      'relative flex items-center gap-2 rounded-full px-3.5 py-2 text-sm font-medium transition-colors',
+      isActive
+        ? 'bg-primary/12 text-foreground shadow-[inset_0_0_0_1px] shadow-primary/25'
+        : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground',
+    );
+
   return (
-    <header>
-      <nav className="w-full border-b bg-linear-to-r from-fuchsia-800 to-purple-950 text-white font-bold">
-        <div className="mx-auto flex h-16 items-center justify-between px-4">
-          {/* Left: Logo */}
-          <div className="flex items-center gap-2">
-            <img src={image_prem_lion} alt="Prem Lion" className="h-10 w-10 rounded-full" />
-            <span className="text-lg">PremPoints 2025/26</span>
-          </div>
+    <header className="sticky top-0 z-40">
+      <div className="glass border-border/60 border-b">
+        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+          <NavLink to="/" className="flex min-w-0 items-center gap-3">
+            <span className="from-primary/70 to-primary/20 rounded-full bg-gradient-to-br p-[2px]">
+              <img
+                src={image_prem_lion}
+                alt=""
+                className="border-background size-9 rounded-full border-2 object-cover"
+              />
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-sm leading-tight font-semibold tracking-tight">
+                PremPoints
+              </span>
+              <span className="text-muted-foreground block text-[11px] leading-tight">2025/26</span>
+            </span>
+          </NavLink>
 
-          {/* Center: Links */}
-          <ul className="flex items-center gap-6">
-            <li>
-              <NavLink to="/" className="hover:text-purple-200" end title="Ctrl+Alt+1">
-                Home
+          <nav className="hidden items-center gap-1 md:flex">
+            {items.map(({ to, label, icon: Icon, shortcut, end }) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={end}
+                className={linkClasses}
+                title={`Ctrl+Alt+${shortcut}`}
+              >
+                <Icon className="size-4 opacity-70" />
+                {label}
               </NavLink>
-            </li>
-            <li>
-              <NavLink to="/leaderboard" className="hover:text-purple-200" title="Ctrl+Alt+2">
-                Leaderboard
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/prices" className="hover:text-purple-200" title="Ctrl+Alt+3">
-                Prices
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/results" className="hover:text-purple-200" title="Ctrl+Alt+4">
-                Results
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/teams" className="hover:text-purple-200" title="Ctrl+Alt+5">
-                Teams
-              </NavLink>
-            </li>
-          </ul>
+            ))}
+          </nav>
 
-          {/* Right: Logout */}
-          <div className="flex items-center">
-            <NavLink to="/logout" className="hover:text-purple-200">
-              Log Out
-            </NavLink>
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground hidden md:inline-flex"
+            >
+              <NavLink to="/logout" title="Ctrl+Alt+0">
+                <LogOut className="size-4" />
+                Log out
+              </NavLink>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((open) => !open)}
+            >
+              {menuOpen ? <X className="size-4" /> : <Menu className="size-4" />}
+            </Button>
           </div>
         </div>
-      </nav>
+
+        {menuOpen && (
+          <nav className="border-border/60 border-t px-4 py-3 md:hidden">
+            <ul className="flex flex-col gap-1">
+              {items.map(({ to, label, icon: Icon, end }) => (
+                <li key={to}>
+                  <NavLink
+                    to={to}
+                    end={end}
+                    className={linkClasses}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <Icon className="size-4 opacity-70" />
+                    {label}
+                  </NavLink>
+                </li>
+              ))}
+              <li>
+                <NavLink to="/logout" className={linkClasses} onClick={() => setMenuOpen(false)}>
+                  <LogOut className="size-4 opacity-70" />
+                  Log out
+                </NavLink>
+              </li>
+            </ul>
+          </nav>
+        )}
+      </div>
     </header>
   );
 }

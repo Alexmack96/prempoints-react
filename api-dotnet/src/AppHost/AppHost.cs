@@ -1,3 +1,7 @@
+// Must match the redirect URI registered in the WorkOS dashboard, and
+// client/src/lib/authConfig.ts assumes sign-in returns to this origin.
+const int ClientPort = 57966;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 // Resolves ConnectionStrings:PremPoints from this project's own configuration
@@ -27,8 +31,15 @@ var api = builder.AddProject<Projects.Api>("prempoints-api")
                  .WithHttpHealthCheck("/alive")
                  .WithExternalHttpEndpoints();
 
-// No WithHttpEndpoint: AddViteApp assigns the port itself and passes it as PORT,
-// which is why client/vite.config.ts reads process.env.PORT.
+// The client port is pinned rather than left to Aspire.
+//
+// AddViteApp would otherwise pick a free port per run — 55160, then 62450, then
+// 57966 across three starts this morning. That is fine until OAuth: WorkOS only
+// redirects back to a URI registered in its dashboard, so a port that changes
+// every run means sign-in fails every run. Registered once at 57966, fixed here.
+//
+// isProxied: false so Vite binds the port directly and the browser talks to it
+// without Aspire's proxy in between, which keeps hot reload's websocket simple.
 //
 // API_URL is what client/vite.config.ts proxies /api to, so the client reaches
 // the API same-origin and CORS never enters the picture locally.
@@ -36,6 +47,7 @@ builder.AddViteApp("prempoints-client", "../../../client")
        .WithBun()
        .WithReference(api)
        .WaitFor(api)
+       .WithHttpEndpoint(port: ClientPort, targetPort: ClientPort, env: "PORT", isProxied: false)
        .WithEnvironment("API_URL", api.GetEndpoint("http"))
        .WithExternalHttpEndpoints();
 

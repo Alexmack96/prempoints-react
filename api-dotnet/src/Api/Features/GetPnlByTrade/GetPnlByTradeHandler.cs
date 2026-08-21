@@ -54,7 +54,7 @@ public class GetPnlByTradeHandler(ILogger<GetPnlByTradeHandler> logger, PremPoin
                 IndexPriceProvisional = GetLatestPrice(effectiveDate, context),
                 IndexPriceFinal = GetLatestPrice(effectiveDate, context),
                 SeasonStartYear = requestedSeason.StartYear,
-                TradePrice = trade.Price.Price,
+                TradePrice = trade.Price.Mid,
             })
             .ToListAsync(cancellationToken);
     }

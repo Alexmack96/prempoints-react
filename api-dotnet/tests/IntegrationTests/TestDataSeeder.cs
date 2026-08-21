@@ -145,7 +145,7 @@ public class TestDataSeeder
             "Arsenal", "Aston Villa", "Brentford", "Brighton", "Bournemouth",
             "Chelsea", "Crystal Palace", "Everton", "Fulham", "Liverpool",
             "Manchester City", "Manchester United", "Newcastle", "Nottingham Forest",
-            "Tottenham", "West Ham", "Wolves", "Burnley", "Leeds United", "Sunderland"
+            "Tottenham", "Coventry", "Hull", "Ipswich", "Leeds United", "Sunderland"
         };
 
         foreach (var (name, index) in teamNames.Select((name, index) => (name, index)))

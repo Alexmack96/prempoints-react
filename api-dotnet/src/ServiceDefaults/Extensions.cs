@@ -115,16 +115,22 @@ public static class Extensions
         // Adding health checks endpoints to applications in non-development environments has security implications.
         ArgumentNullException.ThrowIfNull(app);
         app.MapPrometheusScrapingEndpoint();
+
+        // Liveness is mapped in every environment. The host needs somewhere to
+        // probe to decide whether the container came up — Railway fails the
+        // deploy if its healthcheck path 404s — and this endpoint answers only
+        // "the process is running", which gives an attacker nothing.
+        app.MapHealthChecks(AlivenessEndpointPath, new HealthCheckOptions
+        {
+            Predicate = r => r.Tags.Contains("live")
+        });
+
+        // Readiness stays out of production. Unlike liveness it enumerates every
+        // dependency and reports which one is failing, which is a map of the
+        // infrastructure.
         if (app.Environment.IsDevelopment())
         {
-            // All health checks must pass for app to be considered ready to accept traffic after starting
             app.MapHealthChecks(HealthEndpointPath);
-
-            // Only health checks tagged with the "live" tag must pass for app to be considered alive
-            app.MapHealthChecks(AlivenessEndpointPath, new HealthCheckOptions
-            {
-                Predicate = r => r.Tags.Contains("live")
-            });
         }
         return app;
     }

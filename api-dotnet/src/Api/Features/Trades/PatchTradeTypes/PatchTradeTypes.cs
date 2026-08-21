@@ -1,7 +1,7 @@
-﻿using Api.Infrastructure.Endpoints;
+﻿using Api.Domain.Authorization;
+using Api.Infrastructure.Endpoints;
 using Api.Infrastructure.Endpoints.Filters;
 using Ardalis.Result;
-using Ardalis.Result.AspNetCore;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -38,6 +38,10 @@ public static class PatchTradeTypes
                .WithName("PatchTradeTypes")
                .Produces<List<TradeDto>>(StatusCodes.Status200OK)
                .ProducesProblem(StatusCodes.Status404NotFound)
+               // Bulk-reclassifies trades, and a Joker doubles what one pays out.
+               .RequireAuthorization(Policies.Admin)
+               .ProducesProblem(StatusCodes.Status401Unauthorized)
+               .ProducesProblem(StatusCodes.Status403Forbidden)
                .WithValidation<Request>();
         }
 
@@ -51,7 +55,7 @@ public static class PatchTradeTypes
 
             var result = await sender.Send(command, ct);
 
-            return result.ToMinimalApiResult();
+            return result.ToApiResult();
         }
     }
 }

@@ -37,7 +37,6 @@ public class GetPnlByTradeTests : BaseIntegrationTest
         await SeedPriceAsync("Arsenal", 74, new DateOnly(2025, 8, 22), ct);
 
         var request = new CreateTrades.Request(
-            Username: "Almack",
             TradeDateUtc: asAtDate,
             TradeType: TradeType.Standard,
             TimezoneIana: "Europe/London",
@@ -45,7 +44,7 @@ public class GetPnlByTradeTests : BaseIntegrationTest
         );
 
         // Act
-        var response = await HttpClient.PostAsJsonAsync(BaseUrl, request, ct);
+        var response = await AsAdmin().PostAsJsonAsync(BaseUrl, request, ct);
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -66,7 +65,10 @@ public class GetPnlByTradeTests : BaseIntegrationTest
             Id = Guid.CreateVersion7(),
             ValueDate = valueDate,
             Team = await DataSeeder.GetTeamAsync(context, teamName),
-            Price = priceValue,
+            // Straddled so the computed Mid lands exactly on priceValue, which
+            // is what the assertions below are written against.
+            Bid = priceValue - 0.5m,
+            Ask = priceValue + 0.5m,
             SeasonPeriod = await DataSeeder.GetSeasonPeriodAsync(context, 1, 2025)
         };
 

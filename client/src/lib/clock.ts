@@ -1,19 +1,23 @@
 /**
  * The clock, as an input.
  *
- * Code that reads the current date directly cannot be tested at a chosen
- * instant, so anything that needs "today" takes one of these instead. Tests
- * supply a fixed clock; production passes `systemClock`.
+ * Code that reads the current time directly cannot be tested at a chosen
+ * instant, so anything needing "now" takes one of these. Tests supply a fixed
+ * clock; production passes `systemClock`.
  */
 export type Clock = {
+  /** ISO yyyy-mm-dd, which is what the API's DateOnly parameters expect. */
   today: () => string;
+  /** Full ISO instant, for the API's DateTime parameters. */
+  now: () => string;
 };
 
 export const systemClock: Clock = {
-  // ISO yyyy-mm-dd, which is what the API's DateOnly parameters expect.
   today: () => new Date().toISOString().slice(0, 10),
+  now: () => new Date().toISOString(),
 };
 
-export const fixedClock = (isoDate: string): Clock => ({
-  today: () => isoDate,
+export const fixedClock = (iso: string): Clock => ({
+  today: () => iso.slice(0, 10),
+  now: () => iso,
 });

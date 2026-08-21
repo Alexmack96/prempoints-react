@@ -1,0 +1,72 @@
+﻿{
+  Status: 200 OK,
+  Content: {
+    Headers: {
+      Content-Length: 1039,
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      items: [
+        {
+          teamId: Guid_1,
+          teamName: Arsenal,
+          bid: 84.0,
+          ask: 86.0,
+          mid: 85.0,
+          valueDate: 2025-08-22,
+          priceType: Provisional,
+          previousMid: 81.0,
+          movement: Up
+        },
+        {
+          teamId: Guid_2,
+          teamName: Chelsea,
+          bid: 64.0,
+          ask: 66.0,
+          mid: 65.0,
+          valueDate: 2025-08-22,
+          priceType: Provisional,
+          previousMid: 69.0,
+          movement: Down
+        },
+        {
+          teamId: Guid_3,
+          teamName: Everton,
+          bid: 44.0,
+          ask: 46.0,
+          mid: 45.0,
+          valueDate: 2025-08-22,
+          priceType: Provisional,
+          previousMid: 45.0,
+          movement: Level
+        },
+        {
+          teamId: Guid_4,
+          teamName: Aston Villa,
+          bid: null,
+          ask: null,
+          mid: null,
+          valueDate: null,
+          priceType: null,
+          previousMid: null,
+          movement: Unknown
+        },
+        {
+          teamId: Guid_5,
+          teamName: Bournemouth,
+          bid: null,
+          ask: null,
+          mid: null,
+          valueDate: null,
+          priceType: null,
+          previousMid: null,
+          movement: Unknown
+        }
+      ],
+      page: 1,
+      pageSize: 5,
+      totalCount: 20,
+      totalPages: 4
+    }
+  }
+}

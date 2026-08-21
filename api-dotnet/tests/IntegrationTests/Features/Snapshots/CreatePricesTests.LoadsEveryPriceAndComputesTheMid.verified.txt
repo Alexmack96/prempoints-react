@@ -1,0 +1,41 @@
+﻿{
+  Status: 200 OK,
+  Content: {
+    Headers: {
+      Content-Length: 712,
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: [
+      {
+        id: Guid_1,
+        teamId: Guid_2,
+        seasonPeriodId: Guid_3,
+        bid: 80.5,
+        ask: 82,
+        mid: 81.25,
+        priceType: Provisional,
+        valueDate: 2025-08-15
+      },
+      {
+        id: Guid_4,
+        teamId: Guid_5,
+        seasonPeriodId: Guid_3,
+        bid: 68.5,
+        ask: 70,
+        mid: 69.25,
+        priceType: Provisional,
+        valueDate: 2025-08-15
+      },
+      {
+        id: Guid_6,
+        teamId: Guid_7,
+        seasonPeriodId: Guid_3,
+        bid: 23,
+        ask: 24.5,
+        mid: 23.75,
+        priceType: Provisional,
+        valueDate: 2025-08-15
+      }
+    ]
+  }
+}

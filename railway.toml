@@ -1,0 +1,12 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+# /alive rather than /health: liveness only asks whether the process is up,
+# where readiness also probes SQL. A database blip should not convince Railway
+# the container is dead and restart it into the same blip.
+healthcheckPath = "/alive"
+healthcheckTimeout = 60
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10

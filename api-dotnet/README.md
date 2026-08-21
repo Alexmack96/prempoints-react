@@ -110,6 +110,64 @@
 	The integration tests do not use any of this. They create a throwaway LocalDB
 	database per test and supply their own connection string.
 
+## Deploying to Railway
+
+	One service, one image. The Dockerfile builds the React client with Bun,
+	publishes the API with the .NET SDK, and copies the client's dist into the
+	API's wwwroot — so the container serves both halves from one origin. No CORS,
+	no second service, one URL.
+
+	Railway reads railway.toml: DOCKERFILE builder, healthcheck on /alive.
+
+### First deploy
+
+	1) Point a Railway service at this repo. It picks up railway.toml on its own.
+	2) Set one variable on the service:
+
+		ConnectionStrings__PremPoints = <the Azure SQL connection string>
+
+	   Double underscore, not a colon — that is how .NET maps environment
+	   variables onto nested configuration keys.
+	3) Deploy. Migrations run at startup, so there is no separate migration step.
+
+	Railway injects PORT and the container binds to it. ASPNETCORE_ENVIRONMENT is
+	baked to Production in the image, which is what keeps Swagger and the detailed
+	/health endpoint off the public internet.
+
+### Things that will bite
+
+	Azure SQL firewall. Railway's egress addresses are not in the allow-list
+	until you put them there, and the failure looks like a healthy container that
+	times out on every request. Check this first.
+
+	TLS. Railway terminates it at the edge and forwards plain HTTP, so the app
+	reads the original scheme from X-Forwarded-Proto (see UseForwardedHeaders in
+	Program.cs). Do not add UseHttpsRedirection back — behind that proxy it
+	redirects a request that already arrived over HTTPS, forever.
+
+	Migrating on startup is safe while one instance runs. Two instances starting
+	together race on the same migration; move to a release step before scaling out.
+
+### The trade board needs data
+
+	The homepage is the point of the deployment, and it needs three things in the
+	production database or it renders but cannot be used:
+
+	- **Teams.** Twenty rows. Without them the board is empty.
+	- **A season and gameweek covering today.** The board asks for teams active
+	  today and falls back to every team if no season covers the date, so it will
+	  still render — but nothing else keyed on the season will work.
+	- **Prices for today's date, for every team.** This is the hard one. Trade
+	  submission looks up a price per backed team for the trade date and returns
+	  404 without one, naming the team. No prices means nobody can submit.
+
+	POST /api/v1/seednewseason creates a season, its gameweeks and the team
+	enrolments. Prices are loaded separately through POST /api/v1/prices.
+
+	Both of those endpoints are currently reachable without authentication — see
+	ConventionDebt.AnonymousWrite. Convenient for seeding today, and the first
+	thing to close afterwards.
+
 ## TODO
 	- [ ] Replace the server admin login with a least-privilege SQL user per environment.
 	  The API currently connects as the admin account, which can drop the database;
