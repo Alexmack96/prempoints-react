@@ -28,9 +28,13 @@ COPY api-dotnet/Directory.Build.props api-dotnet/Directory.Packages.props ./api-
 COPY api-dotnet/src/Api/Api.csproj ./api-dotnet/src/Api/
 COPY api-dotnet/src/ServiceDefaults/ServiceDefaults.csproj ./api-dotnet/src/ServiceDefaults/
 RUN dotnet restore api-dotnet/src/Api/Api.csproj
-COPY api-dotnet/ ./api-dotnet/
-# AppHost is deliberately absent: it orchestrates local development and has no
-# job inside a deployed container.
+# Only the two projects that get published. Copying all of api-dotnet/ would
+# pull in AppHost and both test projects, so editing a test would invalidate
+# this layer and rebuild code the test is not part of. AppHost is absent for a
+# second reason too: it orchestrates local development and has no job inside a
+# deployed container.
+COPY api-dotnet/src/Api/ ./api-dotnet/src/Api/
+COPY api-dotnet/src/ServiceDefaults/ ./api-dotnet/src/ServiceDefaults/
 RUN dotnet publish api-dotnet/src/Api/Api.csproj -c Release -o /app/publish --no-restore
 
 # Stage 3: runtime.
@@ -39,9 +43,22 @@ WORKDIR /app
 COPY --from=api /app/publish ./
 COPY --from=client /src/client/dist ./wwwroot
 
+# Published alongside the other two and dead weight in an image that only ever
+# runs as Production. Removing it also keeps the dev database name off the
+# deployed filesystem.
+RUN rm -f appsettings.Development.json
+
 ENV ASPNETCORE_ENVIRONMENT=Production
 EXPOSE 8080
 
+# The runtime image runs as root otherwise. Nothing here writes to disk, so
+# there is no reason to. APP_UID comes from the Microsoft base image.
+USER $APP_UID
+
 # Railway assigns the port at runtime through PORT, so it cannot be baked in.
 # The 8080 default keeps `docker run` working locally without one.
-CMD ["sh", "-c", "ASPNETCORE_HTTP_PORTS=${PORT:-8080} dotnet Api.dll"]
+#
+# exec, so dotnet replaces the shell and becomes PID 1. Without it the shell is
+# PID 1 and Railway's SIGTERM on redeploy is delivered to the shell instead of
+# the app, which then never gets to drain its in-flight requests.
+CMD ["sh", "-c", "export ASPNETCORE_HTTP_PORTS=${PORT:-8080}; exec dotnet Api.dll"]

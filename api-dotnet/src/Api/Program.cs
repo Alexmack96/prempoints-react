@@ -55,10 +55,21 @@ app.UseStatusCodePages();
 // Not in Development: under Aspire the API is served over plain HTTP, so a
 // redirect to a https port that was never bound just breaks every request.
 // TLS is the hosting platform's job in a deployment.
+//
+// /alive is exempt. Railway's healthcheck reaches the container directly on the
+// internal network rather than through the edge, so the X-Forwarded-Proto the
+// block above depends on is not on that request. Kestrel sees plain HTTP,
+// UseHttpsRedirection answers 307, and Railway only accepts a 2xx — so the
+// deploy fails its healthcheck while the app is perfectly healthy.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseHsts();
-    app.UseHttpsRedirection();
+    app.UseWhen(
+        context => !context.Request.Path.StartsWithSegments("/alive"),
+        branch =>
+        {
+            branch.UseHsts();
+            branch.UseHttpsRedirection();
+        });
 }
 
 app.UseCors("AllowFrontend");
