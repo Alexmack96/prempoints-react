@@ -1,0 +1,12 @@
+﻿{
+  Response: {
+    Status: 204 No Content
+  },
+  Request: {
+    Method: DELETE,
+    Uri: http://localhost/api/v1/teams/Guid_1,
+    Headers: {
+      Authorization: {Scrubbed}
+    }
+  }
+}

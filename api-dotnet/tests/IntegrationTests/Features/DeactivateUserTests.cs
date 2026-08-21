@@ -16,7 +16,7 @@ namespace IntegrationTests.Features;
 
 public class DeactivateUserTests : BaseIntegrationTest
 {
-    private const string BaseUrl = "api/users/deactivate";
+    private const string BaseUrl = "api/v1/users/deactivate";
 
     [Fact]
     public async Task DeactivateUser_ReturnsOk_AndActivatesUser()
@@ -33,15 +33,16 @@ public class DeactivateUserTests : BaseIntegrationTest
         var seasonPeriod = await DataSeeder.GetSeasonPeriodAsync(context, 1, 2025);
         var team = await DataSeeder.GetTeamAsync(context, "Chelsea");
 
-        var newPrice = new PriceEntity { Price = 40, ValueDate = asAtDate, Team = team, SeasonPeriod = seasonPeriod };
+        var newPrice = new PriceEntity { Id = Guid.CreateVersion7(), Price = 40, ValueDate = asAtDate, Team = team, SeasonPeriod = seasonPeriod };
         context.Prices.Add(newPrice);
 
-        var newUser = new UserEntity { WorkOSUserId = "user_1", Username = "TEST", FirstName = "TEST", LastName = "TEST", Email = "TEST@TEST.COM", Role = UserRole.Standard };
+        var newUser = new UserEntity { Id = Guid.CreateVersion7(), WorkOSUserId = "user_1", Username = "TEST", FirstName = "TEST", LastName = "TEST", Email = "TEST@TEST.COM", Role = UserRole.Standard };
         context.Users.Add(newUser);
         await context.SaveChangesAsync(ct);
         var tradeDate = new DateTime(2025, 8, 15, 12, 0, 0, DateTimeKind.Utc);
         var tradeEntity = new TradeEntity
         {
+            Id = Guid.CreateVersion7(),
             Exposure = 40,
             TimezoneIana = "Europe/London",
             TradeDateUtc = tradeDate,
@@ -54,7 +55,7 @@ public class DeactivateUserTests : BaseIntegrationTest
 
         context.Trades.Add(tradeEntity);
 
-        var userSeason = new UserSeasonEntity { User = newUser, Season = season };
+        var userSeason = new UserSeasonEntity { Id = Guid.CreateVersion7(), User = newUser, Season = season };
         context.UserSeasons.Add(userSeason);
         await context.SaveChangesAsync(ct);
 

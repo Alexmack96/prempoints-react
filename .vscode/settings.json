@@ -6,5 +6,32 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "always" // non-formatting fixes (e.g., import/order)
   },
-  "eslint.useFlatConfig": true
+  "eslint.useFlatConfig": true,
+  "workbench.colorCustomizations": {
+    "activityBar.activeBackground": "#68006f",
+    "activityBar.background": "#68006f",
+    "activityBar.foreground": "#e7e7e7",
+    "activityBar.inactiveForeground": "#e7e7e799",
+    "activityBarBadge.background": "#807700",
+    "activityBarBadge.foreground": "#e7e7e7",
+    "activityBarTop.activeBackground": "#68006f",
+    "activityBarTop.background": "#68006f",
+    "activityBarTop.foreground": "#e7e7e7",
+    "activityBarTop.inactiveForeground": "#e7e7e799",
+    "commandCenter.border": "#e7e7e799",
+    "commandCenter.foreground": "#e7e7e7",
+    "sash.hoverBorder": "#68006f",
+    "statusBar.background": "#38003c",
+    "statusBar.debuggingBackground": "#38003c",
+    "statusBar.debuggingForeground": "#e7e7e7",
+    "statusBar.foreground": "#e7e7e7",
+    "statusBarItem.hoverBackground": "#68006f",
+    "statusBarItem.remoteBackground": "#605900",
+    "statusBarItem.remoteForeground": "#e7e7e7",
+    "titleBar.activeBackground": "#38003c",
+    "titleBar.activeForeground": "#e7e7e7",
+    "titleBar.inactiveBackground": "#38003c99",
+    "titleBar.inactiveForeground": "#e7e7e799"
+  },
+  "peacock.color": "#38003c"
 }

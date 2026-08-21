@@ -55,7 +55,7 @@ public class TestDataSeeder
         // Generate explicit ID for 2025 so we can reference it immediately
         _season2025 = new SeasonEntity
         {
-            Id = Guid.CreateVersion7(),
+            Id = TestIds.Season(2025),
             SeasonName = "PremPoints 2025/26",
             StartYear = 2025
         };
@@ -64,7 +64,7 @@ public class TestDataSeeder
 
         _seasons.Add(new SeasonEntity
         {
-            Id = Guid.CreateVersion7(),
+            Id = TestIds.Season(2026),
             SeasonName = "PremPoints 2026/27",
             StartYear = 2026
         });
@@ -81,7 +81,7 @@ public class TestDataSeeder
             // Explicitly set ID and link the navigation property
             return new SeasonPeriodEntity
             {
-                Id = Guid.CreateVersion7(),
+                Id = TestIds.SeasonPeriod(gw),
                 GameweekNumber = gw,
                 PeriodStartDate = new DateOnly(year, startMonth, d1),
                 PeriodEndDate = new DateOnly(year, endMonth, d2),
@@ -111,7 +111,7 @@ public class TestDataSeeder
             // DECEMBER
             CreatePeriod(14, 12, 5, 12, 11,2025),
             CreatePeriod(15, 12, 12, 12, 18,2025),
-            new SeasonPeriodEntity { Id = Guid.CreateVersion7(), GameweekNumber = 16, PeriodStartDate = new DateOnly(2025, 12, 19), PeriodEndDate = new DateOnly(2026, 1, 1), Season = _season2025 },
+            new SeasonPeriodEntity { Id = TestIds.SeasonPeriod(16), GameweekNumber = 16, PeriodStartDate = new DateOnly(2025, 12, 19), PeriodEndDate = new DateOnly(2026, 1, 1), Season = _season2025 },
             // JANUARY (2026)
             CreatePeriod(17, 1, 2, 1, 8, 2026),
             CreatePeriod(18, 1, 9, 1, 15, 2026),
@@ -148,11 +148,11 @@ public class TestDataSeeder
             "Tottenham", "West Ham", "Wolves", "Burnley", "Leeds United", "Sunderland"
         };
 
-        foreach (var name in teamNames)
+        foreach (var (name, index) in teamNames.Select((name, index) => (name, index)))
         {
             _teams.Add(new TeamEntity
             {
-                Id = Guid.CreateVersion7(),
+                Id = TestIds.Team(index + 1),
                 TeamName = name
             });
         }
@@ -162,9 +162,9 @@ public class TestDataSeeder
     {
         _users.AddRange(new[]
         {
-            new UserEntity { Id = Guid.CreateVersion7(), WorkOSUserId = "user_1", Username = "Almack", FirstName = "Alex", LastName = "Mackintosh", Email = "am@gmail.com", Role = UserRole.Administrator },
-            new UserEntity { Id = Guid.CreateVersion7(), WorkOSUserId = "user_2", Username = "KC", FirstName = "Casey", LastName = "Liddy", Email = "cl@gmail.com", Role = UserRole.Standard },
-            new UserEntity { Id = Guid.CreateVersion7(), WorkOSUserId = "user_3", Username = "Andy", FirstName = "Andrew", LastName = "Mackintosh", Email = "ajmack@gmail.com", Role = UserRole.Standard }
+            new UserEntity { Id = TestIds.User(1), WorkOSUserId = "user_1", Username = "Almack", FirstName = "Alex", LastName = "Mackintosh", Email = "am@gmail.com", Role = UserRole.Administrator },
+            new UserEntity { Id = TestIds.User(2), WorkOSUserId = "user_2", Username = "KC", FirstName = "Casey", LastName = "Liddy", Email = "cl@gmail.com", Role = UserRole.Standard },
+            new UserEntity { Id = TestIds.User(3), WorkOSUserId = "user_3", Username = "Andy", FirstName = "Andrew", LastName = "Mackintosh", Email = "ajmack@gmail.com", Role = UserRole.Standard }
         });
     }
 
@@ -176,7 +176,7 @@ public class TestDataSeeder
         {
             _userSeasons.Add(new UserSeasonEntity
             {
-                Id = Guid.CreateVersion7(),
+                Id = TestIds.UserSeason(_userSeasons.Count + 1),
                 Season = _season2025,
                 SeasonId = _season2025.Id,
                 User = user,
@@ -193,7 +193,7 @@ public class TestDataSeeder
         {
             _teamSeasons.Add(new TeamSeasonEntity
             {
-                Id = Guid.CreateVersion7(),
+                Id = TestIds.TeamSeason(_teamSeasons.Count + 1),
                 Season = _season2025,
                 SeasonId = _season2025.Id,
                 Team = team,

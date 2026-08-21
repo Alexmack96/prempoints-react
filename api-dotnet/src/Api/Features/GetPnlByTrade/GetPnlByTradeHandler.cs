@@ -3,6 +3,7 @@ using Api.Features.GetPnlDetails;
 using Api.Features.Seasons;
 using Api.Features.Trades;
 using Api.Features.Users;
+using Api.Infrastructure;
 using Api.Infrastructure.EntityFramework;
 using Ardalis.Result;
 using MediatR;
@@ -11,7 +12,7 @@ using static Api.Features.GetPnlByTrade.GetPnlByTrade;
 
 namespace Api.Features.GetPnlByTrade;
 
-public class GetPnlByTradeHandler(ILogger<GetPnlByTradeHandler> logger, PremPointsDbContext context) : IRequestHandler<Query, Result<List<PnlByTrade>>>
+public class GetPnlByTradeHandler(ILogger<GetPnlByTradeHandler> logger, PremPointsDbContext context, TimeProvider clock) : IRequestHandler<Query, Result<List<PnlByTrade>>>
 {
     public async Task<Result<List<PnlByTrade>>> Handle(Query query, CancellationToken cancellationToken)
     {
@@ -27,7 +28,7 @@ public class GetPnlByTradeHandler(ILogger<GetPnlByTradeHandler> logger, PremPoin
             logger.LogWarning("Unable to find user with name: {UserName}", query.Username);
             return Result.NotFound();
         }
-        var effectiveDate = query.AsAtDate ?? DateOnly.FromDateTime(DateTime.UtcNow);
+        var effectiveDate = query.AsAtDate ?? clock.UtcToday();
         var requestedSeason = await SeasonQueries.GetByDateAsync(context, effectiveDate, cancellationToken);
         if (requestedSeason is null)
             return Result.NotFound($"AsAtDate {query.AsAtDate} does not sit in a valid season period.");

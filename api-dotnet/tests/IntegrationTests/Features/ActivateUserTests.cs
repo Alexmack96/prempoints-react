@@ -17,13 +17,13 @@ public class ActivateUserTests : BaseIntegrationTest
     public async Task ActivateUser_ReturnsOk_AndActivatesUser()
     {
         var ct = TestContext.Current.CancellationToken;
-        var baseUrl = "api/users/activate";
+        var baseUrl = "api/v1/users/activate";
 
         // Arrage
         using var scope = Factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<PremPointsDbContext>();
 
-        var newUser = new UserEntity { WorkOSUserId = "user_1", Username = "TEST", FirstName = "TEST", LastName = "TEST", Email = "TEST@TEST.COM", Role = UserRole.Standard };
+        var newUser = new UserEntity { Id = Guid.CreateVersion7(), WorkOSUserId = "user_1", Username = "TEST", FirstName = "TEST", LastName = "TEST", Email = "TEST@TEST.COM", Role = UserRole.Standard };
         context.Users.Add(newUser);
         await context.SaveChangesAsync(ct);
 

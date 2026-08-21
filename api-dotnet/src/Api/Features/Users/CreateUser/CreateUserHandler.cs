@@ -1,5 +1,6 @@
 ﻿using Api.Domain.Entities;
 using Api.Features.Seasons;
+using Api.Infrastructure;
 using Api.Infrastructure.EntityFramework;
 using Ardalis.Result;
 using MediatR;
@@ -8,7 +9,7 @@ using static Api.Features.Users.CreateUser.CreateUser;
 
 namespace Api.Features.Users.CreateUser;
 
-public class CreateUserHandler(PremPointsDbContext context) : IRequestHandler<Command, Result<UserDto>>
+public class CreateUserHandler(PremPointsDbContext context, TimeProvider clock) : IRequestHandler<Command, Result<UserDto>>
 {
     public async Task<Result<UserDto>> Handle(Command command, CancellationToken cancellationToken)
     {
@@ -18,11 +19,12 @@ public class CreateUserHandler(PremPointsDbContext context) : IRequestHandler<Co
         if (userExists)
             return Result.Conflict("DuplicateName", $"User '{command.Username}' already exists.");
 
-        var season = await SeasonQueries.GetByDateAsync(context, DateOnly.FromDateTime(DateTime.UtcNow), cancellationToken);
+        var today = clock.UtcToday();
+        var season = await SeasonQueries.GetByDateAsync(context, today, cancellationToken);
         if (season is null)
-            return Result.NotFound("Season Not Found", $"No valid season found at: '{DateTime.UtcNow}'.");
+            return Result.NotFound("Season Not Found", $"No valid season found at: '{today}'.");
 
-        var newUserId = Guid.CreateVersion7();
+        var newUserId = Guid.CreateVersion7(clock.GetUtcNow());
         var entity = new UserEntity
         {
             Id = newUserId,
@@ -36,7 +38,7 @@ public class CreateUserHandler(PremPointsDbContext context) : IRequestHandler<Co
             LastModifiedBy = newUserId,
         };
 
-        var userSeason = new UserSeasonEntity { Id = Guid.CreateVersion7(), User = entity, Season = season };
+        var userSeason = new UserSeasonEntity { Id = Guid.CreateVersion7(clock.GetUtcNow()), User = entity, Season = season };
 
         context.Users.Add(entity);
         context.UserSeasons.Add(userSeason);

@@ -1,0 +1,20 @@
+﻿{
+  Status: 422 Unprocessable Entity,
+  Content: {
+    Headers: {
+      Content-Length: 277,
+      Content-Type: application/problem+json
+    },
+    Value: {
+      type: https://tools.ietf.org/html/rfc4918#section-11.2,
+      title: One or more validation errors occurred.,
+      status: 422,
+      errors: {
+        Sort: [
+          Sort must be one of: teamName, -teamName, createdAt, -createdAt.
+        ]
+      },
+      traceId: {Scrubbed}
+    }
+  }
+}

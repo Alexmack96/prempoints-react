@@ -1,4 +1,5 @@
 ﻿using Api.Features.Seasons;
+using Api.Infrastructure;
 using Api.Infrastructure.EntityFramework;
 using Ardalis.Result;
 using MediatR;
@@ -6,12 +7,12 @@ using static Api.Features.Users.GetActiveUsers.GetActiveUsers;
 
 namespace Api.Features.Users.GetActiveUsers;
 
-public class GetActiveUsersHandler(PremPointsDbContext context) : IRequestHandler<Query, Result<List<UserDto>>>
+public class GetActiveUsersHandler(PremPointsDbContext context, TimeProvider clock) : IRequestHandler<Query, Result<List<UserDto>>>
 {
     public async Task<Result<List<UserDto>>> Handle(Query command, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
-        var effectiveDate = command.AsAtDate ?? DateOnly.FromDateTime(DateTime.UtcNow);
+        var effectiveDate = command.AsAtDate ?? clock.UtcToday();
 
         var season = await SeasonQueries.GetByDateAsync(context, effectiveDate, cancellationToken);
         if (season is null)

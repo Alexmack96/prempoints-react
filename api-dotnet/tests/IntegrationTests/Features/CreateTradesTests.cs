@@ -11,7 +11,7 @@ namespace IntegrationTests.Features;
 
 public class CreateTradesTests : BaseIntegrationTest
 {
-    private const string BaseUrl = "/api/trades";
+    private const string BaseUrl = "/api/v1/trades";
 
     [Fact]
     public async Task CreateTrades_ReturnsOk_AndCreatesSingleTrade()

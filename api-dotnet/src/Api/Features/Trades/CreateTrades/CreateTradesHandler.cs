@@ -8,7 +8,7 @@ using static Api.Features.Trades.CreateTrades.CreateTrades;
 
 namespace Api.Features.Trades.CreateTrades;
 
-public class CreateTradesHandler(PremPointsDbContext context) : IRequestHandler<Command, Result<List<TradeDto>>>
+public class CreateTradesHandler(PremPointsDbContext context, TimeProvider clock) : IRequestHandler<Command, Result<List<TradeDto>>>
 {
     public async Task<Result<List<TradeDto>>> Handle(Command command, CancellationToken cancellationToken)
     {
@@ -64,7 +64,7 @@ public class CreateTradesHandler(PremPointsDbContext context) : IRequestHandler<
                 // INSERT
                 var newTrade = new TradeEntity
                 {
-                    Id = Guid.CreateVersion7(),
+                    Id = Guid.CreateVersion7(clock.GetUtcNow()),
                     //FKs & navigation
                     UserId = user.Id,
                     TeamId = team.Id,

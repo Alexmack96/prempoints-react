@@ -9,7 +9,7 @@ using static Api.Features.Prices.CreatePrice.CreatePrice;
 
 namespace Api.Features.Prices.CreatePrice;
 
-public class CreatePriceHandler(PremPointsDbContext context) : IRequestHandler<Command, Result<PriceDto>>
+public class CreatePriceHandler(PremPointsDbContext context, TimeProvider clock) : IRequestHandler<Command, Result<PriceDto>>
 {
     public async Task<Result<PriceDto>> Handle(Command command, CancellationToken cancellationToken)
     {
@@ -35,6 +35,7 @@ public class CreatePriceHandler(PremPointsDbContext context) : IRequestHandler<C
         {
             var newPriceEntity = new PriceEntity
             {
+                Id = Guid.CreateVersion7(clock.GetUtcNow()),
                 TeamId = team.Id,
                 SeasonPeriodId = currentSeasonPeriod.Id,
                 Price = command.Price,

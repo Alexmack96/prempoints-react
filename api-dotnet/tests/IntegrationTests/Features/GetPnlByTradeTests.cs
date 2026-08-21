@@ -10,9 +10,23 @@ namespace IntegrationTests.Features;
 
 public class GetPnlByTradeTests : BaseIntegrationTest
 {
-    private const string BaseUrl = "/api/pnl/trade";
+    private const string BaseUrl = "/api/v1/pnl/trade";
 
-    [Fact]
+    // Two separate problems, neither of which a green tick would be honest about:
+    //
+    // 1. This test POSTs a CreateTrades.Request to /api/v1/pnl/trade, which is a
+    //    MapGet — hence the 405 it fails with. Its assertions (a List<TradeDto>
+    //    with one entry) describe CreateTrades' response, not a PnL response,
+    //    and CreateTradesTests already covers that endpoint.
+    // 2. The endpoint it names is not finished. GetPnlByTradeHandler hardcodes
+    //    PnlValue = 10 and calls GetLatestPrice, which throws
+    //    NotImplementedException. Pointing this test at the real GET would swap
+    //    a 405 for a 500.
+    //
+    // Skipped rather than deleted so the missing coverage stays visible, and
+    // rather than repointed so it does not become a duplicate that hides the
+    // fact that PnL has no tests because PnL has no implementation.
+    [Fact(Skip = "GetPnlByTradeHandler.GetLatestPrice throws NotImplementedException; PnlValue is hardcoded.")]
     public async Task GetPnlByTrade_ShouldReturnCorrectPnl_GivenValidSetup()
     {
         var ct = TestContext.Current.CancellationToken;

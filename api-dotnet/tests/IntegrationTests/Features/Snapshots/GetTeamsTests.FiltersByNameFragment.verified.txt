@@ -1,0 +1,25 @@
+﻿{
+  Status: 200 OK,
+  Content: {
+    Headers: {
+      Content-Length: 216,
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      items: [
+        {
+          id: Guid_1,
+          teamName: Manchester City
+        },
+        {
+          id: Guid_2,
+          teamName: Manchester United
+        }
+      ],
+      page: 1,
+      pageSize: 20,
+      totalCount: 2,
+      totalPages: 1
+    }
+  }
+}

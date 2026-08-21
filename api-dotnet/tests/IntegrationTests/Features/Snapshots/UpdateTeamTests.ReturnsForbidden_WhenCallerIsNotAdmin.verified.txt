@@ -1,0 +1,15 @@
+﻿{
+  Status: 403 Forbidden,
+  Content: {
+    Headers: {
+      Content-Length: 162,
+      Content-Type: application/problem+json
+    },
+    Value: {
+      type: https://tools.ietf.org/html/rfc9110#section-15.5.4,
+      title: Forbidden,
+      status: 403,
+      traceId: {Scrubbed}
+    }
+  }
+}

@@ -1,0 +1,37 @@
+﻿{
+  Status: 200 OK,
+  Content: {
+    Headers: {
+      Content-Length: 410,
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      items: [
+        {
+          id: Guid_1,
+          teamName: Arsenal
+        },
+        {
+          id: Guid_2,
+          teamName: Aston Villa
+        },
+        {
+          id: Guid_3,
+          teamName: Bournemouth
+        },
+        {
+          id: Guid_4,
+          teamName: Brentford
+        },
+        {
+          id: Guid_5,
+          teamName: Brighton
+        }
+      ],
+      page: 1,
+      pageSize: 5,
+      totalCount: 20,
+      totalPages: 4
+    }
+  }
+}

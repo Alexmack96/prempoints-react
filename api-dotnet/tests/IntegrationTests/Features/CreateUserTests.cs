@@ -18,7 +18,7 @@ public class CreateUserTests : BaseIntegrationTest
         var ct = TestContext.Current.CancellationToken;
         var request = new CreateUser.Request("Almack96", "Alex", "Mackintosh", "alexmackintosh96@gmail.com", UserRole.Administrator);
 
-        var response = await HttpClient.PostAsJsonAsync("/api/users", request, ct);
+        var response = await AsAdmin().PostAsJsonAsync("/api/v1/users", request, ct);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 

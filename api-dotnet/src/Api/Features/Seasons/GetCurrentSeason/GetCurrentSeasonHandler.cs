@@ -1,4 +1,5 @@
-﻿using Api.Infrastructure.EntityFramework;
+﻿using Api.Infrastructure;
+using Api.Infrastructure.EntityFramework;
 using Ardalis.Result;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -6,13 +7,13 @@ using static Api.Features.Seasons.GetCurrentSeason.GetCurrentSeason;
 
 namespace Api.Features.Seasons.GetCurrentSeason;
 
-public class GetCurrentSeasonHandler(ILogger<GetCurrentSeasonHandler> logger, PremPointsDbContext context) : IRequestHandler<Query, Result<SeasonDto>>
+public class GetCurrentSeasonHandler(ILogger<GetCurrentSeasonHandler> logger, PremPointsDbContext context, TimeProvider clock) : IRequestHandler<Query, Result<SeasonDto>>
 {
     public async Task<Result<SeasonDto>> Handle(Query query, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(query);
 
-        var requestedDate = query.AsAtDate ?? DateOnly.FromDateTime(DateTime.UtcNow);
+        var requestedDate = query.AsAtDate ?? clock.UtcToday();
 
         var currentSeason = await SeasonQueries.GetByDateAsync(context, requestedDate, cancellationToken);
 

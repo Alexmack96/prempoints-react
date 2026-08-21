@@ -1,4 +1,5 @@
 ﻿using Api.Features.Seasons;
+using Api.Infrastructure;
 using Api.Infrastructure.EntityFramework;
 using Ardalis.Result;
 using MediatR;
@@ -7,7 +8,7 @@ using static Api.Features.UserSeasons.DeactivateUser.DeactivateUser;
 
 namespace Api.Features.UserSeasons.DeactivateUser;
 
-public class DeactivateUserHandler(PremPointsDbContext context) : IRequestHandler<Command, Result> // Changed to non-generic Result
+public class DeactivateUserHandler(PremPointsDbContext context, TimeProvider clock) : IRequestHandler<Command, Result> // Changed to non-generic Result
 {
     public async Task<Result> Handle(Command command, CancellationToken cancellationToken)
     {
@@ -17,7 +18,7 @@ public class DeactivateUserHandler(PremPointsDbContext context) : IRequestHandle
         if (requestedUser is null)
             return Result.NotFound($"User '{command.Username}' not found.");
 
-        var effectiveDate = command.AsAtDate ?? DateOnly.FromDateTime(DateTime.UtcNow);
+        var effectiveDate = command.AsAtDate ?? clock.UtcToday();
         var requestedSeason = await SeasonQueries.GetByDateAsync(context, effectiveDate, cancellationToken);
         if (requestedSeason is null)
             return Result.NotFound("No valid season found for this date.");

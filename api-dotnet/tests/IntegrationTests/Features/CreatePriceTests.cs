@@ -17,7 +17,7 @@ public class CreatePriceTests : BaseIntegrationTest
         var valueDate = new DateOnly(2025, 08, 15);
         var request = new CreatePrice.Request(teamName, price, valueDate);
 
-        var response = await HttpClient.PostAsJsonAsync("/api/prices", request, ct);
+        var response = await AsAdmin().PostAsJsonAsync("/api/v1/prices", request, ct);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
@@ -36,7 +36,7 @@ public class CreatePriceTests : BaseIntegrationTest
         var valueDate = new DateOnly(2025, 08, 15);
         var request = new CreatePrice.Request(teamName, price, valueDate);
 
-        var response = await HttpClient.PostAsJsonAsync("/api/prices", request, ct);
+        var response = await AsAdmin().PostAsJsonAsync("/api/v1/prices", request, ct);
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }

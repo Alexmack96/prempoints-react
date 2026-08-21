@@ -18,10 +18,13 @@
     <!-- The harness talks to LocalDB directly to create and drop its throwaway
          database, outside the DbContext the API uses. -->
     <PackageReference Include="Microsoft.Data.SqlClient" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="NSubstitute" />
     <PackageReference Include="xunit.runner.visualstudio" />
     <PackageReference Include="xunit.v3" />
+    <PackageReference Include="Verify.XunitV3" />
+    <PackageReference Include="Verify.Http" />
   </ItemGroup>
 
   <ItemGroup>

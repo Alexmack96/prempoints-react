@@ -1,13 +1,15 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../../lib/api';
 import { teamKeys } from '../teamKeys';
+import type { TeamDto } from '../teamDto';
 
 // 1. Types
 type CreateTeamRequest = { teamName: string };
 
 // 2. API (Colocated)
 const createTeam = async (newTeam: CreateTeamRequest) => {
-  return apiClient.post('teams', newTeam);
+  // 201 Created; the Location header points at the new team.
+  return apiClient.post<TeamDto>('/teams', newTeam);
 };
 
 // 3. Hook

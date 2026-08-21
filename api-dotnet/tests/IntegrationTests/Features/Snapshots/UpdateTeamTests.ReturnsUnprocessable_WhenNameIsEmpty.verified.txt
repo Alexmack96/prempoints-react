@@ -1,0 +1,21 @@
+﻿{
+  Status: 422 Unprocessable Entity,
+  Content: {
+    Headers: {
+      Content-Length: 324,
+      Content-Type: application/problem+json
+    },
+    Value: {
+      type: https://tools.ietf.org/html/rfc4918#section-11.2,
+      title: One or more validation errors occurred.,
+      status: 422,
+      errors: {
+        TeamName: [
+          'Team Name' must not be empty.,
+          'Team Name' must be between 1 and 50 characters. You entered 0 characters.
+        ]
+      },
+      traceId: {Scrubbed}
+    }
+  }
+}

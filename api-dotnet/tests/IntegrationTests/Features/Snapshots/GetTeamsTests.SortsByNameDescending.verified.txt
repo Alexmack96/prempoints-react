@@ -1,0 +1,29 @@
+﻿{
+  Status: 200 OK,
+  Content: {
+    Headers: {
+      Content-Length: 267,
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      items: [
+        {
+          id: Guid_1,
+          teamName: Wolves
+        },
+        {
+          id: Guid_2,
+          teamName: West Ham
+        },
+        {
+          id: Guid_3,
+          teamName: Tottenham
+        }
+      ],
+      page: 1,
+      pageSize: 3,
+      totalCount: 20,
+      totalPages: 7
+    }
+  }
+}
