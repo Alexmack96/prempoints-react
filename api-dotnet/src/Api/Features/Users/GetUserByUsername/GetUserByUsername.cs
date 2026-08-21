@@ -14,7 +14,10 @@ public static class GetUserByUsername
     {
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
-            app.MapGet("users/{username}", Handler).WithTags("Users");
+            app.MapGet("users/{username}", Handler)
+               .WithName("GetUserByUsername")
+               .Produces<UserDto>(StatusCodes.Status200OK)
+               .ProducesProblem(StatusCodes.Status404NotFound).WithTags("Users");
         }
 
         public static async Task<IResult> Handler([FromRoute] string username, [FromServices] ISender sender, CancellationToken ct = default)

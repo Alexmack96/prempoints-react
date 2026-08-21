@@ -1,10 +1,31 @@
-﻿using Microsoft.Extensions.DependencyInjection.Extensions;
+using Api.Infrastructure.Endpoints.Filters;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Reflection;
 
 namespace Api.Infrastructure.Endpoints;
 
 public static class EndpointExtensions
 {
+    /// <summary>
+    /// Adds the FluentValidation filter and declares the status it produces, as
+    /// one call.
+    /// <para>
+    /// These were two independent calls, and an endpoint could carry the filter
+    /// while documenting 400, or documenting nothing at all — three did. Binding
+    /// them together means the published contract cannot disagree with the
+    /// behaviour, which is a stronger guarantee than a test asserting they
+    /// happen to match.
+    /// </para>
+    /// </summary>
+    public static RouteHandlerBuilder WithValidation<TRequest>(this RouteHandlerBuilder builder)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+
+        return builder
+            .AddEndpointFilter<ValidationFilter<TRequest>>()
+            .ProducesValidationProblem(StatusCodes.Status422UnprocessableEntity);
+    }
+
     public static IServiceCollection AddEndpoints(this IServiceCollection services)
     {
         services.AddEndpoints(Assembly.GetExecutingAssembly());

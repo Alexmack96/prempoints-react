@@ -42,12 +42,9 @@ public static class SeedNewSeason
         {
             app.MapPost("seednewseason", HandleAsync)
                .WithName("SeedNewSeason")
-               .RequireRateLimiting("DefaultPolicy")
-               .AddEndpointFilter<ValidationFilter<Request>>()
-               .Produces<TeamDto>(StatusCodes.Status200OK)
-               .ProducesValidationProblem()
+               .WithValidation<Request>()
+               .Produces(StatusCodes.Status200OK)
                .ProducesProblem(StatusCodes.Status409Conflict)
-               .ProducesProblem(StatusCodes.Status400BadRequest)
                .WithTags("Admin");
         }
 

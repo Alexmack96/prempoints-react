@@ -29,11 +29,10 @@ public static class GetPnlByTrade
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
             app.MapGet("pnl/trade/{username?}", HandleAsync)
+               .WithTags("Pnl")
                 .WithName("GetPnlByTrade")
-                .RequireRateLimiting("DefaultPolicy")
-                .AddEndpointFilter<ValidationFilter<Request>>()
-                .Produces<List<TeamDto>>(StatusCodes.Status200OK)
-                .ProducesValidationProblem()
+                .WithValidation<Request>()
+                .Produces<List<PnlByTrade>>(StatusCodes.Status200OK)
                 .ProducesProblem(StatusCodes.Status404NotFound);
         }
 

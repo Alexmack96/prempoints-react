@@ -24,7 +24,11 @@ public static class CreateSeasonPeriod
     {
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
-            app.MapPost("seasonPeriods", Handle);
+            app.MapPost("seasonPeriods", Handle)
+               .WithName("CreateSeasonPeriod")
+               .Produces<SeasonPeriodDto>(StatusCodes.Status200OK)
+               .ProducesProblem(StatusCodes.Status404NotFound)
+               .WithTags("SeasonPeriods");
         }
 
         public static async Task<IResult> Handle([FromBody] Request request, [FromServices] ISender sender, CancellationToken ct = default)

@@ -25,13 +25,11 @@ public static class GetActiveUsers
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
             app.MapGet("users/active", HandleAsync)
+               .WithTags("Users")
                .WithName("GetActiveUsers")
-               .RequireRateLimiting("DefaultPolicy")
-               .AddEndpointFilter<ValidationFilter<Request>>()
-               .Produces<List<UserDto>>(StatusCodes.Status201Created)
-               .ProducesValidationProblem()
-               .ProducesProblem(StatusCodes.Status409Conflict)
-               .ProducesProblem(StatusCodes.Status400BadRequest);
+               .WithValidation<Request>()
+               .Produces<List<UserDto>>(StatusCodes.Status200OK)
+               .ProducesProblem(StatusCodes.Status404NotFound);
         }
 
         public static async Task<IResult> HandleAsync([AsParameters] Request request, [FromServices] ISender sender, CancellationToken ct = default)

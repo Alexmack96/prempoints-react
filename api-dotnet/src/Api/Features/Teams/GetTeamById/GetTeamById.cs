@@ -26,7 +26,6 @@ public static class GetTeamById
                .WithName("GetTeamById")
                .WithTags("Teams")
                .WithSummary("Fetch a single team by its identifier.")
-               .RequireRateLimiting("DefaultPolicy")
                .Produces<TeamDto>(StatusCodes.Status200OK)
                .ProducesProblem(StatusCodes.Status404NotFound);
         }

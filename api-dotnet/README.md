@@ -37,25 +37,64 @@
 	   Guid.CreateVersion7, and the only scrubbed values are traceId and the
 	   genuinely random ids the API mints at runtime. To accept a deliberate
 	   change, review the .received.txt and rename it over the .verified.txt.
+	5) Conventions: EndpointConventionTests and ConventionRulesTests read the
+	   endpoints the application actually mapped and assert the conventions below.
+	   Between them they found twenty-odd violations the day they were written,
+	   including four endpoints whose OpenAPI named the wrong response type.
+	   EndpointInventoryTests snapshots the whole surface — method, route, policy
+	   and declared statuses — so any change to the contract has to be reviewed
+	   and accepted rather than merely noticed.
 
 ## REST conventions
 
 	Teams is the reference slice. Anything new should look like it.
 
-	| Concern | Convention |
-	|---|---|
-	| Versioning | One URL segment, applied once in Program.cs: `/api/v1`. |
-	| Identity | The opaque id, always. Names are filters, never routes — a name is mutable, so a URL built from one breaks on the first rename. |
-	| Collections | One read-collection per resource. "Active", "by name" and the rest are query parameters on it, not routes of their own. |
-	| Paging | `PagedResponse<T>` envelope, `?page=&pageSize=`, capped at 100. A page size above the cap is refused, not clamped, so a caller cannot mispage silently. |
-	| Sorting | `?sort=field` / `?sort=-field`, from a per-resource allow-list, always with an id tiebreaker so paging is stable. |
-	| Empty results | 200 with an empty collection. Never 404, never an error. |
-	| Create | 201 with a `Location` header built from the item route via LinkGenerator. |
-	| Delete | 204. Real deletes, no soft-delete flag. 409 if a foreign key still points at the row, with a detail naming what blocked it. |
-	| Update | PUT, full replacement. The uniqueness check excludes the row being updated, so a no-op PUT stays idempotent. |
-	| Errors | RFC 9457 ProblemDetails for every failure, including bare 401/403/404 — see ResultExtensions and UseStatusCodePages. |
-	| Validation | 422, from the FluentValidation endpoint filter. |
-	| AuthZ | A named policy per endpoint. `Policies.Admin` for reference-data writes. |
+	The Enforced column is not decoration. These rules were prose only until they
+	had already rotted — ten of eighteen endpoints had no rate limiter, four
+	declared `TeamDto` as the response type of something that was not a team, and
+	eight writes were reachable without authentication. A row marked "prose" is
+	one where that can happen again.
+
+	Enforcement levels: **test** — a convention test fails the build.
+	**construction** — the API makes the wrong thing hard to write.
+	**config** — one global setting, no per-endpoint choice.
+	**slice** — covered by that resource's own snapshot tests, which a new slice
+	copies. **prose** — nothing checks it.
+
+	| Concern | Convention | Enforced |
+	|---|---|---|
+	| Versioning | One URL segment, applied once in Program.cs: `/api/v1`. The whole API versions as a unit — shipping `/v2/teams` alone would need endpoints to declare their own version. | test |
+	| Rate limiting | Applied to the route group, not per endpoint. An endpoint needing a different budget overrides it. | test |
+	| Identity | The opaque id, always, constrained `{id:guid}`. Names are filters, never routes — a name is mutable, so a URL built from one breaks on the first rename. | test |
+	| Paging | `PagedResponse<T>` envelope, `?page=&pageSize=`, capped at 100. Requests implement `IPagedRequest`; validators inherit `PagedRequestValidator`. A page size above the cap is refused, never clamped. | test (a collection read may not return a bare array) |
+	| Create | 201 with a `Location` header built from the item route via `LinkGenerator`, so the version prefix stays in one place. | test |
+	| Delete | 204. Real deletes, no soft-delete flag. 409 if a foreign key still points at the row, with a detail naming what blocked it. | test (204 + 404 declared) |
+	| AuthZ | Every write requires authorization. A named policy per endpoint; `Policies.Admin` for reference-data writes. Roles live on the user row, not the WorkOS token, so they are projected onto the principal during token validation. | test (that a policy exists, and that 401/403 are declared — not *which* policy) |
+	| OpenAPI | `WithName` and `WithTags` on every endpoint, names unique, at least one 2xx declared, 404 declared on every item route. | test |
+	| DTOs | Never expose audit columns or raw foreign keys. That is why `TeamDto` is two fields. | test |
+	| Validation | 422, via `.WithValidation<TRequest>()`, which adds the filter and declares the status together so they cannot drift. A malformed body is still a framework 400; that is a different failure. | construction |
+	| Errors | RFC 9457 ProblemDetails for every failure, including bare 401/403/404 — see `ResultExtensions` and `UseStatusCodePages`. | construction (if you use `ToApiResult`) |
+	| Sorting | `?sort=field` / `?sort=-field` against a `SortMap` allow-list, always with an id tiebreaker. Without it, rows sharing a sort key move between pages — and every row seeded in one `SaveChanges` shares a `CreatedAtUtc`, so ties are the normal case. | construction (if you use `SortMap`) |
+	| Enums | Cross the wire as strings, never ints. | config |
+	| Update | PUT, full replacement. The uniqueness check excludes the row being updated, so a no-op PUT stays idempotent. | slice |
+	| Empty results | 200 with an empty collection. Never 404, never an error. Cannot distinguish "no season covers that date" from "season has no teams" — accepted, since 404 on a collection is worse. | slice |
+	| Collections | One read-collection per resource. "Active", "by name" and the rest are query parameters on it, not routes of their own. | prose (the Identity rule blocks name-keyed routes, but nothing counts collections) |
+	| Cancellation | Every endpoint, handler and query takes a `CancellationToken` and passes it down. | prose |
+	| Dates | `DateOnly` as ISO `yyyy-mm-dd`; instants UTC. The clock is an injected `TimeProvider`, never `DateTime.UtcNow` — including anything derived from it, such as v7 ids. | prose |
+	| Concurrency | None, deliberately. Last write wins. One admin edits reference data; reinstate a rowversion and `If-Match` the day that stops being true. | n/a — a decision, not a rule |
+
+### Convention debt
+
+	The rules above are switched on today because the endpoints that break them
+	are named in `tests/IntegrationTests/Features/ConventionDebt.cs`, each with a
+	reason. Every entry is debt, not permission — a new endpoint cannot join a
+	list without someone deliberately adding it, and a test fails if an entry
+	outlives the route it excused.
+
+	The largest list is `AnonymousWrite`. Eight endpoints that change game state
+	— including trade submission and reseeding a season — are reachable without
+	authentication. Unlike the others this is a security decision rather than a
+	shape one: closing an entry means choosing which policy guards it.
 
 ## Getting Started
 	1) Set the database connection string in user-secrets (it holds a password, so it is not committed):

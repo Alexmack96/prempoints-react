@@ -19,8 +19,13 @@ public static class GetUserMe
         {
             // Matches your frontend: apiClient.get('/users/me')
             app.MapGet("users/me", Handler)
+               .WithName("GetUserMe")
+               .Produces<UserDto>(StatusCodes.Status200OK)
+               .ProducesProblem(StatusCodes.Status404NotFound)
                .WithTags("Users")
-               .RequireAuthorization(); // Important: Ensure only logged-in users access this
+               .RequireAuthorization()
+               .ProducesProblem(StatusCodes.Status401Unauthorized)
+               .ProducesProblem(StatusCodes.Status403Forbidden); // Important: Ensure only logged-in users access this
         }
 
         public static async Task<IResult> Handler(

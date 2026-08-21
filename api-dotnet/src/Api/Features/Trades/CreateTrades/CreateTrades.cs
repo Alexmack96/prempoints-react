@@ -37,7 +37,10 @@ public static class CreateTrades
     {
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
-            app.MapPost("trades", Handler).WithTags("Trades");
+            app.MapPost("trades", Handler)
+               .WithName("CreateTrades")
+               .Produces<List<TradeDto>>(StatusCodes.Status200OK)
+               .ProducesProblem(StatusCodes.Status404NotFound).WithTags("Trades");
         }
 
         public static async Task<IResult> Handler([FromBody] Request request, [FromServices] ISender sender, CancellationToken ct = default)

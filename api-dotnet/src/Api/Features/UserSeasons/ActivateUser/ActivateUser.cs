@@ -26,7 +26,11 @@ public static class ActivateUser
     {
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
-            app.MapPost("users/activate/{username}", HandleAsync).AddEndpointFilter<ValidationFilter<Request>>();
+            app.MapPost("users/activate/{username}", HandleAsync)
+               .WithName("ActivateUser")
+               .Produces<UserSeasonDto>(StatusCodes.Status200OK)
+               .ProducesProblem(StatusCodes.Status404NotFound)
+               .WithTags("UserSeasons").WithValidation<Request>();
         }
 
         public static async Task<IResult> HandleAsync(

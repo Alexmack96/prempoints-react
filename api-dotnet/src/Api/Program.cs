@@ -77,7 +77,15 @@ app.UseRateLimiter(); // Apply limits after we know who the user is
 // a URL segment rather than a header or a library: it is the one form every
 // client, proxy and log already understands, and it costs one line here.
 // The client reaches these through the Vite dev-server proxy, same-origin.
-app.MapFeatureEndpoints(app.MapGroup("api/v1"));
+//
+// RequireRateLimiting is applied here, to the group, rather than on each
+// endpoint. It was per-endpoint and 10 of 18 endpoints had quietly been
+// written without it: a limiter you have to remember is one you forget, and
+// forgetting leaves the endpoint unlimited. An endpoint needing a different
+// budget overrides this with its own RequireRateLimiting call.
+app.MapFeatureEndpoints(
+    app.MapGroup("api/v1")
+       .RequireRateLimiting("DefaultPolicy"));
 
 // /alive and /health, deliberately outside the "api" prefix: they are host
 // concerns, and the Aspire dashboard probes /alive by absolute path.

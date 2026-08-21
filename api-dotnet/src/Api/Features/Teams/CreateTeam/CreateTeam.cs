@@ -31,13 +31,11 @@ public static class CreateTeam
                .WithName("CreateTeam")
                .WithTags("Teams")
                .WithSummary("Create a team and enrol it in the current season.")
-               .RequireRateLimiting("DefaultPolicy")
-               .AddEndpointFilter<ValidationFilter<Request>>()
+               .WithValidation<Request>()
                // Teams are reference data. Any signed-in player could otherwise
                // add one, and every price and trade in the game hangs off them.
                .RequireAuthorization(Policies.Admin)
                .Produces<TeamDto>(StatusCodes.Status201Created)
-               .ProducesValidationProblem()
                .ProducesProblem(StatusCodes.Status401Unauthorized)
                .ProducesProblem(StatusCodes.Status403Forbidden)
                .ProducesProblem(StatusCodes.Status404NotFound)

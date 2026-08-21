@@ -34,9 +34,11 @@ public static class PatchTradeTypes
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
             app.MapPatch("trades/type", HandleAsync)
+               .WithTags("Trades")
                .WithName("PatchTradeTypes")
-               .AddEndpointFilter<ValidationFilter<Request>>()
-               .ProducesValidationProblem();
+               .Produces<List<TradeDto>>(StatusCodes.Status200OK)
+               .ProducesProblem(StatusCodes.Status404NotFound)
+               .WithValidation<Request>();
         }
 
         public static async Task<IResult> HandleAsync(

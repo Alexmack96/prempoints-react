@@ -27,7 +27,11 @@ public static class GetCurrentSeason
     {
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
-            app.MapGet("seasons/current", HandleAsync).AddEndpointFilter<ValidationFilter<Request>>();
+            app.MapGet("seasons/current", HandleAsync)
+               .WithName("GetCurrentSeason")
+               .Produces<SeasonDto>(StatusCodes.Status200OK)
+               .ProducesProblem(StatusCodes.Status404NotFound)
+               .WithTags("Seasons").WithValidation<Request>();
         }
 
         public static async Task<IResult> HandleAsync(

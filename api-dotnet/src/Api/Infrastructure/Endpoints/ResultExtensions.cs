@@ -80,10 +80,7 @@ public static class ResultExtensions
                 .GroupBy(e => e.Identifier, StringComparer.Ordinal)
                 .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray(), StringComparer.Ordinal);
 
-            return Results.ValidationProblem(
-                grouped,
-                statusCode: StatusCodes.Status422UnprocessableEntity,
-                type: ProblemTypes.UnprocessableEntity);
+            return ApiProblem.Validation(grouped);
         }
 
         var (statusCode, title, type) = Describe(status);
@@ -104,6 +101,24 @@ public static class ResultExtensions
         ResultStatus.Unavailable => (StatusCodes.Status503ServiceUnavailable, "Service Unavailable", ProblemTypes.Unavailable),
         _ => (StatusCodes.Status500InternalServerError, "Internal Server Error", ProblemTypes.ServerError),
     };
+}
+
+/// <summary>
+/// The one place a validation failure becomes a response.
+/// <para>
+/// Both the FluentValidation endpoint filter and the Result mapping above end
+/// up here. They used to build their own, and agreed on the status code and
+/// type URI only by coincidence — one edit away from an API that answers the
+/// same failure two different ways depending on which layer caught it.
+/// </para>
+/// </summary>
+public static class ApiProblem
+{
+    public static IResult Validation(IDictionary<string, string[]> errors) =>
+        Results.ValidationProblem(
+            errors,
+            statusCode: StatusCodes.Status422UnprocessableEntity,
+            type: ProblemTypes.UnprocessableEntity);
 }
 
 /// <summary>

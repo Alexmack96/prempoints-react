@@ -30,16 +30,14 @@ public static class CreatePrice
         {
             app.MapPost("prices", HandleAsync)
                .WithName("CreatePrice")
-               .RequireRateLimiting("DefaultPolicy")
-               .AddEndpointFilter<ValidationFilter<Request>>()
+               .WithValidation<Request>()
                .WithTags("Prices")
                .RequireAuthorization()
-               .ProducesValidationProblem()
                .ProducesProblem(StatusCodes.Status401Unauthorized)
                .ProducesProblem(StatusCodes.Status403Forbidden)
                //Specific to the endpoint
                .ProducesProblem(StatusCodes.Status409Conflict)
-               .Produces<TeamDto>(StatusCodes.Status201Created);
+               .Produces<PriceDto>(StatusCodes.Status200OK);
         }
 
         public static async Task<IResult> HandleAsync([FromBody] Request request, [FromServices] ISender sender, CancellationToken ct)

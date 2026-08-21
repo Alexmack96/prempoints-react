@@ -28,7 +28,6 @@ public static class DeleteTeam
                .WithName("DeleteTeam")
                .WithTags("Teams")
                .WithSummary("Delete a team that nothing references.")
-               .RequireRateLimiting("DefaultPolicy")
                .RequireAuthorization(Policies.Admin)
                .Produces(StatusCodes.Status204NoContent)
                .ProducesProblem(StatusCodes.Status401Unauthorized)

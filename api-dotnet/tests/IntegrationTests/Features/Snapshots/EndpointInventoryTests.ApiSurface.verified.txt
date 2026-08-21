@@ -1,0 +1,20 @@
+﻿DELETE api/v1/teams/{id:guid}           Admin      204 401:ProblemDetails 403:ProblemDetails 404:ProblemDetails 409:ProblemDetails
+GET    api/v1/pnl/trade/{username?}     anon       200:List<PnlByTrade> 404:ProblemDetails 422:HttpValidationProblemDetails
+GET    api/v1/seasons/current           anon       200:SeasonDto 404:ProblemDetails 422:HttpValidationProblemDetails
+GET    api/v1/teams                     anon       200:PagedResponse<TeamDto> 422:HttpValidationProblemDetails
+GET    api/v1/teams/{id:guid}           anon       200:TeamDto 404:ProblemDetails
+GET    api/v1/users/active              anon       200:List<UserDto> 404:ProblemDetails 422:HttpValidationProblemDetails
+GET    api/v1/users/me                  auth       200:UserDto 401:ProblemDetails 403:ProblemDetails 404:ProblemDetails
+GET    api/v1/users/{username}          anon       200:UserDto 404:ProblemDetails
+PATCH  api/v1/trades/type               anon       200:List<TradeDto> 404:ProblemDetails 422:HttpValidationProblemDetails
+POST   api/v1/prices                    auth       200:PriceDto 401:ProblemDetails 403:ProblemDetails 409:ProblemDetails 422:HttpValidationProblemDetails
+POST   api/v1/seasonPeriods             anon       200:SeasonPeriodDto 404:ProblemDetails
+POST   api/v1/seasons                   anon       200:SeasonDto 409:ProblemDetails
+POST   api/v1/seednewseason             anon       200 409:ProblemDetails 422:HttpValidationProblemDetails
+POST   api/v1/teams                     Admin      201:TeamDto 401:ProblemDetails 403:ProblemDetails 404:ProblemDetails 409:ProblemDetails 422:HttpValidationProblemDetails
+POST   api/v1/teams/activate/{teamName} anon       200:TeamSeasonDto 404:ProblemDetails 422:HttpValidationProblemDetails
+POST   api/v1/trades                    anon       200:List<TradeDto> 404:ProblemDetails
+POST   api/v1/users                     auth       200:UserDto 401:ProblemDetails 403:ProblemDetails 409:ProblemDetails 422:HttpValidationProblemDetails
+POST   api/v1/users/activate/{username} anon       200:UserSeasonDto 404:ProblemDetails 422:HttpValidationProblemDetails
+POST   api/v1/users/deactivate/{username} anon       200 404:ProblemDetails 422:HttpValidationProblemDetails
+PUT    api/v1/teams/{id:guid}           Admin      200:TeamDto 401:ProblemDetails 403:ProblemDetails 404:ProblemDetails 409:ProblemDetails 422:HttpValidationProblemDetails

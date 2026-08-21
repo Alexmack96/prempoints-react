@@ -36,7 +36,7 @@ public class GetTeamsHandler(PremPointsDbContext context, TimeProvider clock)
 
         var totalCount = await filtered.CountAsync(cancellationToken);
 
-        var items = await TeamSort.Apply(filtered, query.Sort)
+        var items = await TeamSort.Map.Apply(filtered, query.Sort)
             .Skip((query.Page - 1) * query.PageSize)
             .Take(query.PageSize)
             .Select(t => new TeamDto { Id = t.Id, TeamName = t.TeamName })

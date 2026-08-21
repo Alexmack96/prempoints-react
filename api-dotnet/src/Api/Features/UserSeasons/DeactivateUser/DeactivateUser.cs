@@ -25,7 +25,11 @@ public static class DeactivateUser
     {
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
-            app.MapPost("users/deactivate/{username}", HandleAsync).AddEndpointFilter<ValidationFilter<Request>>();
+            app.MapPost("users/deactivate/{username}", HandleAsync)
+               .WithName("DeactivateUser")
+               .Produces(StatusCodes.Status200OK)
+               .ProducesProblem(StatusCodes.Status404NotFound)
+               .WithTags("UserSeasons").WithValidation<Request>();
         }
 
         public static async Task<IResult> HandleAsync(

@@ -34,14 +34,12 @@ public static class CreateUser
         {
             app.MapPost("users", Handler).WithTags("Users")
                .WithName("CreateUser")
-               .RequireRateLimiting("DefaultPolicy")
-               .AddEndpointFilter<ValidationFilter<Request>>()
-               .Produces<TeamDto>(StatusCodes.Status201Created)
-               .ProducesValidationProblem()
+               .WithValidation<Request>()
+               .Produces<UserDto>(StatusCodes.Status200OK)
                .ProducesProblem(StatusCodes.Status409Conflict)
-               .ProducesProblem(StatusCodes.Status400BadRequest)
-               .WithTags("Users")
-               .RequireAuthorization();
+               .RequireAuthorization()
+               .ProducesProblem(StatusCodes.Status401Unauthorized)
+               .ProducesProblem(StatusCodes.Status403Forbidden);
         }
 
         public static async Task<IResult> Handler([FromBody] Request request, ClaimsPrincipal user, [FromServices] ISender sender, CancellationToken ct = default)

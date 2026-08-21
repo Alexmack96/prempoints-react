@@ -11,7 +11,7 @@
       status: 422,
       errors: {
         Sort: [
-          Sort must be one of: teamName, -teamName, createdAt, -createdAt.
+          Sort must be one of: createdAt, -createdAt, teamName, -teamName.
         ]
       },
       traceId: {Scrubbed}

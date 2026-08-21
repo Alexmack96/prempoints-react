@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using Api.Infrastructure.Endpoints;
+using FluentValidation;
 
 namespace Api.Infrastructure.Endpoints.Filters;
 
@@ -28,7 +29,7 @@ public class ValidationFilter<T>(ILogger<ValidationFilter<T>> logger) : IEndpoin
             // Log as Warning: Client error. logging Keys ensures we don't log sensitive PII values.
             logger.LogWarning("Validation failed for {Type}. Failed Fields: {@FailedFields}", typeof(T).Name, errors.Keys);
 
-            return Results.ValidationProblem(errors, statusCode: StatusCodes.Status422UnprocessableEntity);
+            return ApiProblem.Validation(errors);
         }
 
         return await next(context);

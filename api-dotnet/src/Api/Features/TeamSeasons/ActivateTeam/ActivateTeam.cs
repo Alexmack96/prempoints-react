@@ -25,7 +25,11 @@ public static class ActivateTeam
     {
         public void MapEndpoint(IEndpointRouteBuilder app)
         {
-            app.MapPost("teams/activate/{teamName}", Handler).AddEndpointFilter<ValidationFilter<Request>>();
+            app.MapPost("teams/activate/{teamName}", Handler)
+               .WithName("ActivateTeam")
+               .Produces<TeamSeasonDto>(StatusCodes.Status200OK)
+               .ProducesProblem(StatusCodes.Status404NotFound)
+               .WithTags("TeamSeasons").WithValidation<Request>();
         }
 
         public static async Task<IResult> Handler([FromRoute] string teamName, [FromBody] Request request, [FromServices] ISender sender)
