@@ -14,6 +14,14 @@ builder.Services
     .AddPersistence(builder.Configuration)       // EF Core, Interceptors
     .AddApplicationServices();                   // MediatR, Validators, UserServices
 
+// Deployed environments only. Locally the database is LocalDB, which does not
+// pause and does not want a connection opened against it every half hour; the
+// integration tests run as Development for the same reason.
+if (!builder.Environment.IsDevelopment())
+{
+    builder.Services.AddHostedService<DatabaseKeepAlive>();
+}
+
 var app = builder.Build();
 
 // 3. Request Pipeline (Middleware Order Matters!)
