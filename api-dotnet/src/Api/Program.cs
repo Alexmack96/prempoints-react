@@ -15,10 +15,18 @@ builder.Services
     .AddPersistence(builder.Configuration)       // EF Core, Interceptors
     .AddApplicationServices();                   // MediatR, Validators, UserServices
 
-// Deployed environments only. Locally the database is LocalDB, which does not
-// pause and does not want a connection opened against it every half hour; the
-// integration tests run as Development for the same reason.
-if (!builder.Environment.IsDevelopment())
+builder.Services.Configure<DatabaseKeepAliveOptions>(
+    builder.Configuration.GetSection(DatabaseKeepAliveOptions.SectionName));
+
+// Deployed environments only, and only when the schedule says so. Locally the
+// database is LocalDB, which does not pause and does not want a connection
+// opened against it on a timer; the integration tests run as Development for
+// the same reason.
+var keepAlive = builder.Configuration
+    .GetSection(DatabaseKeepAliveOptions.SectionName)
+    .Get<DatabaseKeepAliveOptions>();
+
+if (!builder.Environment.IsDevelopment() && keepAlive?.Enabled == true)
 {
     builder.Services.AddHostedService<DatabaseKeepAlive>();
 }

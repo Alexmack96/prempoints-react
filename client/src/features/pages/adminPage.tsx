@@ -4,6 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { CreateTeamForm } from '../teams/create-team/CreateTeamForm';
 import { useTeamsList } from '../teams/teams-list/useTeamsList';
 import { TeamBadge } from '../trades/TeamBadge';
+import { SeedSeasonCard } from '../admin/SeedSeasonCard';
 
 export const AdminPage = () => {
   const { data: teams, isLoading, isError, error } = useTeamsList();
@@ -25,6 +26,8 @@ export const AdminPage = () => {
           Season setup. The clubs here are the ones players can trade.
         </p>
       </header>
+
+      <SeedSeasonCard />
 
       <div className="grid gap-6 lg:grid-cols-[22rem_1fr]">
         <Card className="h-fit">

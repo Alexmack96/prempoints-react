@@ -1,40 +1,66 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Api.Infrastructure.EntityFramework;
 
 /// <summary>
-/// Holds the Azure SQL serverless database open by touching it on a timer.
+/// Holds the Azure SQL serverless database open during the hours anyone is
+/// likely to be trading, and lets it pause the rest of the week.
 /// <para>
 /// The database auto-pauses after an hour idle, and the first connection after
 /// that waits 30 to 60 seconds for a resume while returning transient failures.
-/// A league that is quiet overnight would meet that wait every morning.
+/// Probing round the clock would avoid that, and on the free offer would also
+/// spend a month's compute allowance in about two days — so the schedule in
+/// <see cref="DatabaseKeepAliveOptions"/> decides when it is worth paying for.
 /// </para>
 /// <para>
 /// This does nothing for the cold start at deploy time. Hosted services do not
 /// begin until <c>RunAsync</c>, and the migration in Program.cs runs before it,
 /// so a deploy onto a paused database still waits for the resume with no help
-/// from here. Only disabling auto-pause fixes that one.
+/// from here.
 /// </para>
 /// </summary>
 public sealed class DatabaseKeepAlive(
     IServiceScopeFactory scopeFactory,
+    IOptions<DatabaseKeepAliveOptions> options,
     TimeProvider timeProvider,
     ILogger<DatabaseKeepAlive> logger) : BackgroundService
 {
     /// <summary>
-    /// Half the one hour auto-pause delay, so a single failed probe still
-    /// leaves a second attempt before the idle window closes.
+    /// How often the schedule is consulted. Deliberately shorter than the gap
+    /// between probes: a tick costs nothing when the window is shut, and it
+    /// means the first probe lands within five minutes of a window opening
+    /// rather than up to half an hour into it.
     /// </summary>
-    private static readonly TimeSpan Interval = TimeSpan.FromMinutes(30);
+    private static readonly TimeSpan TickInterval = TimeSpan.FromMinutes(5);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // TimeProvider rather than the ambient clock, so a test can advance
-        // time instead of waiting half an hour for the first tick.
-        using var timer = new PeriodicTimer(Interval, timeProvider);
+        var settings = options.Value;
+        var minimumGap = TimeSpan.FromMinutes(settings.MinimumMinutesBetweenProbes);
+
+        logger.LogInformation(
+            "Database keep-alive scheduled across {Windows} window(s) in {TimeZone}.",
+            settings.Windows.Count,
+            settings.TimeZone);
+
+        // TimeProvider rather than the ambient clock, so a test can advance time
+        // instead of waiting for a window to come round.
+        using var timer = new PeriodicTimer(TickInterval, timeProvider);
+
+        var lastProbe = DateTimeOffset.MinValue;
 
         while (await timer.WaitForNextTickAsync(stoppingToken).ConfigureAwait(false))
         {
+            var now = timeProvider.GetUtcNow();
+
+            if (!settings.IsInsideWindow(now) || now - lastProbe < minimumGap)
+            {
+                continue;
+            }
+
+            lastProbe = now;
+
             try
             {
                 await using var scope = scopeFactory.CreateAsyncScope();

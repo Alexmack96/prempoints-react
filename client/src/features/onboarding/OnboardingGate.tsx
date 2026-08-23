@@ -1,11 +1,15 @@
 import { useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Check, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useCurrentUser } from '../auth/useCurrentUser';
 import { useTeamsList } from '../teams/teams-list/useTeamsList';
 import { useUpdateMyProfile } from '../users/useUpdateMyProfile';
 import { TeamBadge } from '../trades/TeamBadge';
+import image_prem_lion from '../../assets/prem_lion.jpg';
 
 const USERNAME_PATTERN = /^[A-Za-z0-9_-]+$/;
 
@@ -41,9 +45,9 @@ const OnboardingForm = ({ suggestedUsername }: { suggestedUsername: string }) =>
   const { data: teams, isLoading: loadingTeams } = useTeamsList();
   const { mutate, isPending, error } = useUpdateMyProfile();
 
-  const tooShort = username.trim().length < 3;
+  const trimmed = username.trim();
+  const tooShort = trimmed.length < 3;
   const badCharacters = username.length > 0 && !USERNAME_PATTERN.test(username);
-  const canSubmit = !tooShort && !badCharacters && !isPending;
 
   // The API answers 409 with a ProblemDetails when the name is taken. Shown
   // against the field, because that is the one thing the player can act on.
@@ -53,20 +57,59 @@ const OnboardingForm = ({ suggestedUsername }: { suggestedUsername: string }) =>
     'response' in error &&
     (error as { response?: { status?: number } }).response?.status === 409;
 
+  const invalid = tooShort || badCharacters || conflict;
+  const selectedTeam = teams?.find((team) => team.id === teamId) ?? null;
+
+  const hint = conflict
+    ? `${trimmed} is already taken.`
+    : badCharacters
+      ? 'Letters, digits, hyphens and underscores only.'
+      : tooShort
+        ? 'At least three characters.'
+        : `We picked ${suggestedUsername} for you. Keep it or change it.`;
+
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-lg flex-col justify-center gap-8 px-4 py-10">
-      <header className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight">Welcome to PremPoints</h1>
-        <p className="text-muted-foreground text-sm">
-          Two quick things and you are in. Both can be changed later.
-        </p>
+    <div className="mx-auto flex w-full max-w-xl flex-col gap-8 py-4">
+      <header className="flex flex-col items-center gap-4 text-center">
+        <span className="from-primary/70 to-primary/20 rounded-full bg-gradient-to-br p-[3px]">
+          <img
+            src={image_prem_lion}
+            alt=""
+            className="border-background size-16 rounded-full border-2 object-cover"
+          />
+        </span>
+        <div className="space-y-1.5">
+          <h1 className="text-2xl font-semibold tracking-tight">Welcome to PremPoints</h1>
+          <p className="text-muted-foreground text-sm">
+            Two quick things and you are in.
+          </p>
+        </div>
       </header>
 
+      {/* The reason both questions sit on one screen: this is what the answers
+          add up to. Seeing the row assemble as you type is worth more than any
+          amount of explaining what the fields are for. */}
+      <div className="glass border-border/60 flex items-center gap-3 rounded-2xl border p-4">
+        <span className="text-muted-foreground w-6 text-center text-sm font-semibold">1</span>
+        {selectedTeam ? (
+          <TeamBadge teamName={selectedTeam.teamName} size={36} />
+        ) : (
+          <span className="border-border/60 size-9 shrink-0 rounded-full border border-dashed" />
+        )}
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-medium">
+            {trimmed.length > 0 ? trimmed : suggestedUsername}
+          </span>
+          <span className="text-muted-foreground block text-[11px]">
+            {selectedTeam ? selectedTeam.teamName : 'No club yet'}
+          </span>
+        </span>
+        <span className="numeric text-muted-foreground text-sm">0.0</span>
+      </div>
+
       <div className="space-y-2">
-        <label htmlFor="username" className="text-sm font-medium">
-          Your name on the leaderboard
-        </label>
-        <input
+        <Label htmlFor="username">Your name on the leaderboard</Label>
+        <Input
           id="username"
           value={username}
           onChange={(event) => setUsername(event.target.value)}
@@ -74,32 +117,29 @@ const OnboardingForm = ({ suggestedUsername }: { suggestedUsername: string }) =>
           autoCapitalize="none"
           spellCheck={false}
           maxLength={50}
-          className="border-border/60 bg-background focus-visible:ring-primary/40 w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none focus-visible:ring-2"
+          aria-invalid={invalid}
+          aria-describedby="username-hint"
         />
         <p
-          className={cn(
-            'text-xs',
-            badCharacters || conflict ? 'text-destructive' : 'text-muted-foreground',
-          )}
+          id="username-hint"
+          className={cn('text-xs', invalid ? 'text-destructive' : 'text-muted-foreground')}
         >
-          {conflict
-            ? `${username} is already taken.`
-            : badCharacters
-              ? 'Letters, digits, hyphens and underscores only.'
-              : tooShort
-                ? 'At least three characters.'
-                : `We suggested ${suggestedUsername} — keep it or change it.`}
+          {hint}
         </p>
       </div>
 
       <div className="space-y-3">
-        <span className="text-sm font-medium">Your club</span>
+        <Label>Your club</Label>
 
         {loadingTeams ? (
-          <p className="text-muted-foreground text-sm">Loading clubs…</p>
-        ) : (
+          <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
+            {Array.from({ length: 10 }, (_, index) => (
+              <Skeleton key={index} className="h-[76px] rounded-xl" />
+            ))}
+          </div>
+        ) : teams && teams.length > 0 ? (
           <ul className="grid grid-cols-4 gap-2 sm:grid-cols-5">
-            {teams?.map((team) => {
+            {teams.map((team) => {
               const selected = team.id === teamId;
 
               return (
@@ -112,12 +152,17 @@ const OnboardingForm = ({ suggestedUsername }: { suggestedUsername: string }) =>
                     aria-pressed={selected}
                     title={team.teamName}
                     className={cn(
-                      'flex w-full flex-col items-center gap-1.5 rounded-xl border p-2 transition-colors',
+                      'relative flex w-full flex-col items-center gap-1.5 rounded-xl border p-2 transition-colors',
                       selected
                         ? 'border-primary/60 bg-primary/10'
-                        : 'border-transparent hover:bg-accent/60',
+                        : 'hover:bg-accent/60 border-transparent',
                     )}
                   >
+                    {selected && (
+                      <span className="bg-primary text-primary-foreground absolute top-1 right-1 grid size-4 place-items-center rounded-full">
+                        <Check className="size-2.5" strokeWidth={3} />
+                      </span>
+                    )}
                     <TeamBadge teamName={team.teamName} size={40} />
                     <span className="text-muted-foreground w-full truncate text-center text-[10px]">
                       {team.teamName}
@@ -127,23 +172,32 @@ const OnboardingForm = ({ suggestedUsername }: { suggestedUsername: string }) =>
               );
             })}
           </ul>
+        ) : (
+          // No season has been seeded yet, so there is nothing to pick from.
+          // Said plainly rather than showing an empty grid that reads as broken.
+          <p className="text-muted-foreground text-sm">
+            No clubs yet — the season has not been set up. You can carry on and
+            pick one later.
+          </p>
         )}
       </div>
 
-      <Button
-        className="rounded-full"
-        disabled={!canSubmit}
-        onClick={() => mutate({ username: username.trim(), favouriteTeamId: teamId })}
-      >
-        {isPending && <Loader2 className="size-4 animate-spin" />}
-        {teamId ? 'Start trading' : 'Skip the club, start trading'}
-      </Button>
+      <div className="space-y-3">
+        <Button
+          className="w-full rounded-full"
+          disabled={invalid || isPending}
+          onClick={() => mutate({ username: trimmed, favouriteTeamId: teamId })}
+        >
+          {isPending && <Loader2 className="size-4 animate-spin" />}
+          Start trading
+        </Button>
 
-      {error && !conflict && (
-        <p className="text-destructive text-xs">
-          That did not save. Check your connection and try again.
-        </p>
-      )}
+        {error && !conflict && (
+          <p className="text-destructive text-center text-xs">
+            That did not save. Check your connection and try again.
+          </p>
+        )}
+      </div>
     </div>
   );
 };

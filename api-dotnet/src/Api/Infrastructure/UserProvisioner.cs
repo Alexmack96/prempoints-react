@@ -131,7 +131,7 @@ public sealed class UserProvisioner(
         {
             await context.SaveChangesAsync(cancellationToken);
         }
-        catch (DbUpdateException)
+        catch (DbUpdateException exception)
         {
             // Two requests from a brand-new user can race here — a page that
             // fires several queries on load is enough. The unique indexes mean
@@ -139,9 +139,30 @@ public sealed class UserProvisioner(
             // right answer for both.
             context.ChangeTracker.Clear();
 
-            return await context.Users
+            var winner = await context.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.WorkOSUserId == externalId, cancellationToken);
+
+            if (winner is not null)
+            {
+                return winner;
+            }
+
+            // No winner means this was not a race and the insert genuinely
+            // failed. Treating that as "someone beat me to it" hides a broken
+            // sign-in behind a silent null: the caller sees an authenticated
+            // session with no player and nothing in the logs to say why.
+            //
+            // The likeliest cause is a database whose schema is behind the
+            // model, because migrations only run automatically outside
+            // Development — see the end of Program.cs.
+            logger.LogError(
+                exception,
+                "Could not create a user row for {ExternalId}. If this is a local database, check " +
+                "that migrations have been applied: dotnet ef database update.",
+                externalId);
+
+            return null;
         }
 
         logger.LogInformation("Created user {UserId} for WorkOS identity {ExternalId}.", userId, externalId);
