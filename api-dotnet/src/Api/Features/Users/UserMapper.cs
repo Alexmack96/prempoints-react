@@ -13,9 +13,11 @@ public static class UserMapper
             Id = entity.Id,
             WorkOSUserId = entity.WorkOSUserId,
             Username = entity.Username,
-            Email = entity.Email,
             FirstName = entity.FirstName,
             LastName = entity.LastName,
+            UsernameChosen = entity.UsernameChosen,
+            FavouriteTeamId = entity.FavouriteTeamId,
+            FavouriteTeamName = entity.FavouriteTeam?.TeamName,
             Role = entity.Role
         };
     }
@@ -27,9 +29,10 @@ public static class UserMapper
             Id = dto.Id,
             WorkOSUserId = dto.WorkOSUserId,
             Username = dto.Username,
-            Email = dto.Email,
             FirstName = dto.FirstName,
             LastName = dto.LastName,
+            UsernameChosen = dto.UsernameChosen,
+            FavouriteTeamId = dto.FavouriteTeamId,
             Role = dto.Role
         };
     }

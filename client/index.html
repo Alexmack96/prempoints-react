@@ -2,9 +2,19 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="PremPoints 2025/26 — long or short the Premier League." />
+    <link rel="icon" type="image/jpeg" href="/prem_lion.jpg" />
+    <link rel="apple-touch-icon" href="/prem_lion.jpg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <!-- Matches background_color in the manifest, so the splash Android draws
+         while the bundle boots is the same colour as the app behind it. -->
+    <meta name="theme-color" content="#0b0f14" />
+    <!-- iOS ignores the manifest for these two. Without them an installed
+         icon still opens in a Safari chrome with an address bar. -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="PremPoints" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="PremPoints 2026/27 — long or short the Premier League." />
     <meta name="color-scheme" content="light dark" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -12,7 +22,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap"
       rel="stylesheet"
     />
-    <title>PremPoints 2025/26</title>
+    <title>PremPoints 2026/27</title>
     <script>
       // Applied before first paint, so a dark-theme player never gets a white
       // flash while React boots. ThemeProvider owns it from then on.

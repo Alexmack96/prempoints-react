@@ -39,7 +39,8 @@ public class AuditableEntityInterceptor(ICurrentUserService currentUserService, 
                 // Set Timestamp
                 entry.Entity.CreatedAtUtc = utcNow;
 
-                // Set Author (The "CreateUser" Logic)
+                // Set Author. A handler may already have set this — UserProvisioner
+                // points a new user at their own id — so only fill a blank.
                 // If the Handler ALREADY set this (e.g. to the new user's own ID), 
                 // this will be non-empty, so we skip it.
                 // If the Handler left it empty (CreateTeam), we fill it.

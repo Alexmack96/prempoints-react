@@ -99,7 +99,8 @@ killed mid-way.
 
 # 2. To Do
 
-[X] Make the home cards
+[] test onboarding gate for username and favouriote team 
+[] Seed season start
 []also on mobile mode, i.e. i tried ctrl+shift+m in my broswer on computer, it should only show one card and a name dropdown selector that flips between themn , and an option to select a second one. quite different from how the web ui is!
 [] Seed prices for the screenshot here, the prices table should have a bid and ask, and we should calculate in the c# model the average as being the price every time, never persist it, redundant. make a mapping where names dont match, seems like only man utd and man city
 [] on mobile, there should just be one nice card and a team selector that flips between the badgfes/names etc. since not enough real estate to show all 20 

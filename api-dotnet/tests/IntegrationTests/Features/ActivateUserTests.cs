@@ -23,7 +23,7 @@ public class ActivateUserTests : BaseIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<PremPointsDbContext>();
 
-        var newUser = new UserEntity { Id = Guid.CreateVersion7(), WorkOSUserId = "user_1", Username = "TEST", FirstName = "TEST", LastName = "TEST", Email = "TEST@TEST.COM", Role = UserRole.Standard };
+        var newUser = new UserEntity { Id = Guid.CreateVersion7(), WorkOSUserId = "user_1", Username = "TEST", FirstName = "TEST", LastName = "TEST", Role = UserRole.Standard };
         context.Users.Add(newUser);
         await context.SaveChangesAsync(ct);
 

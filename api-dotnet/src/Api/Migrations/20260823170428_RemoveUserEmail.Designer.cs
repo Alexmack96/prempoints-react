@@ -4,6 +4,7 @@ using Api.Infrastructure.EntityFramework;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Api.Migrations
 {
     [DbContext(typeof(PremPointsDbContext))]
-    partial class PremPointsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260823170428_RemoveUserEmail")]
+    partial class RemoveUserEmail
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -284,9 +287,6 @@ namespace Api.Migrations
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("FavouriteTeamId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -308,16 +308,11 @@ namespace Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<bool>("UsernameChosen")
-                        .HasColumnType("bit");
-
                     b.Property<string>("WorkOSUserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("FavouriteTeamId");
 
                     b.HasIndex("Username")
                         .IsUnique();
@@ -443,16 +438,6 @@ namespace Api.Migrations
                     b.Navigation("Team");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Api.Domain.Entities.UserEntity", b =>
-                {
-                    b.HasOne("Api.Domain.Entities.TeamEntity", "FavouriteTeam")
-                        .WithMany()
-                        .HasForeignKey("FavouriteTeamId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("FavouriteTeam");
                 });
 
             modelBuilder.Entity("Api.Domain.Entities.UserSeasonEntity", b =>

@@ -36,7 +36,7 @@ public class DeactivateUserTests : BaseIntegrationTest
         var newPrice = new PriceEntity { Id = Guid.CreateVersion7(), Bid = 39.5m, Ask = 40.5m, ValueDate = asAtDate, Team = team, SeasonPeriod = seasonPeriod };
         context.Prices.Add(newPrice);
 
-        var newUser = new UserEntity { Id = Guid.CreateVersion7(), WorkOSUserId = "user_1", Username = "TEST", FirstName = "TEST", LastName = "TEST", Email = "TEST@TEST.COM", Role = UserRole.Standard };
+        var newUser = new UserEntity { Id = Guid.CreateVersion7(), WorkOSUserId = "user_1", Username = "TEST", FirstName = "TEST", LastName = "TEST", Role = UserRole.Standard };
         context.Users.Add(newUser);
         await context.SaveChangesAsync(ct);
         var tradeDate = new DateTime(2025, 8, 15, 12, 0, 0, DateTimeKind.Utc);

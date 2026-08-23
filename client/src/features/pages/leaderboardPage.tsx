@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/table';
 import { useLeaderboard } from '../leaderboard/useLeaderboard';
 import { useCurrentUser } from '../auth/useCurrentUser';
+import { useSeasonLabel } from '../seasons/useCurrentSeason';
 
 /**
  * Initials for the avatar disc. Two letters from the name, so the column has
@@ -46,6 +47,7 @@ export const LeaderboardPage = () => {
   const { data: rows, isLoading, isError, error } = useLeaderboard();
   const { user } = useAuth();
   const { data: me } = useCurrentUser();
+  const season = useSeasonLabel();
 
   if (isError) {
     return (
@@ -73,7 +75,7 @@ export const LeaderboardPage = () => {
 
       <Card className="overflow-hidden py-0">
         <CardHeader className="border-border/60 gap-1 border-b py-4">
-          <CardTitle className="text-base">2025/26 standings</CardTitle>
+          <CardTitle className="text-base">{season ? `${season} standings` : 'Standings'}</CardTitle>
           <CardDescription>
             {isLoading ? 'Loading…' : `${rows?.length ?? 0} players enrolled`}
           </CardDescription>

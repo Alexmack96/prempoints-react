@@ -141,6 +141,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(TimeProvider.System);
 
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<IUserProvisioner, UserProvisioner>();
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         services.AddMediatR(cfg =>
         {
@@ -300,38 +301,26 @@ public static class ServiceCollectionExtensions
                 OnAuthenticationFailed = _ => Task.CompletedTask,
                 OnTokenValidated = async context =>
                 {
-                    // Logic extracted to keep Program.cs clean
-                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
-                    var externalId = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                    if (context.Principal is null) return;
 
-                    logger.LogInformation("Token Validated for User: {ExternalId}", externalId);
-
-                    if (string.IsNullOrEmpty(externalId)) return;
-
-                    var dbContext = context.HttpContext.RequestServices.GetRequiredService<PremPointsDbContext>();
-
-                    // Note: In high traffic production, consider caching this user lookup 
-                    // to avoid hitting the DB on every single API request.
-                    var user = await dbContext.Users
-                        .AsNoTracking()
-                        .FirstOrDefaultAsync(u => u.WorkOSUserId == externalId);
+                    // Finds the PremPoints row for this WorkOS identity, and
+                    // creates it on a first sign-in. Shared with the
+                    // integration tests' auth handler rather than written twice,
+                    // because two copies of "who is this" drift and only one of
+                    // them is the one under test.
+                    var provisioner = context.HttpContext.RequestServices.GetRequiredService<IUserProvisioner>();
+                    var user = await provisioner.ResolveAsync(context.Principal, context.HttpContext.RequestAborted);
 
                     if (user is null) return;
 
-                    if (context.Principal?.Identity is ClaimsIdentity claimsIdentity)
+                    if (context.Principal.Identity is ClaimsIdentity claimsIdentity)
                     {
                         claimsIdentity.AddClaim(new Claim("InternalUserId", user.Id.ToString()));
 
-                        
-
-                        // The role is ours, not WorkOS's — it lives on the user row, so it
-
-                        // has to be projected onto the principal here or Policies.Admin can
-
-                        // never be satisfied. Added as a role claim so the built-in
-
-                        // RequireRole does the work.
-
+                        // The role is ours, not WorkOS's — it lives on the user
+                        // row, so it has to be projected onto the principal here
+                        // or Policies.Admin can never be satisfied. Added as a
+                        // role claim so the built-in RequireRole does the work.
                         claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, user.Role.ToString()));
                     }
                 }

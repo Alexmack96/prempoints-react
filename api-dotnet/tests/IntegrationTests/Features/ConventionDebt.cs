@@ -20,7 +20,6 @@ internal static class ConventionDebt
     public static readonly Dictionary<string, string> CreateReturnsOk = new(StringComparer.Ordinal)
     {
         ["api/v1/prices"] = "No GET /prices/{id} to point Location at.",
-        ["api/v1/users"] = "No GET /users/{id}; identity is still the username.",
         ["api/v1/seasons"] = "No GET /seasons/{id}.",
         ["api/v1/seasonPeriods"] = "No GET /seasonPeriods/{id}.",
         ["api/v1/seednewseason"] = "An admin action, not a resource collection.",

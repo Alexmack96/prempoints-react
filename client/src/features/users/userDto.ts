@@ -4,6 +4,13 @@ export type UserDto = {
   username: string;
   firstName: string;
   lastName: string;
-  email: string;
+  /**
+   * False until the player has been through the onboarding gate. It is what
+   * tells a generated username from a chosen one, so the app knows whether to
+   * ask. Keeping the generated name counts as choosing it.
+   */
+  usernameChosen: boolean;
+  favouriteTeamId: string | null;
+  favouriteTeamName: string | null;
   role: 'Standard' | 'Administrator';
 };

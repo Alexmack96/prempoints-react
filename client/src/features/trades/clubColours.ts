@@ -33,11 +33,52 @@ export const clubColours: Record<string, ClubColours> = {
   tottenham: { primary: '#132257', secondary: '#FFFFFF' },
 };
 
-export const slugify = (teamName: string) =>
+/**
+ * Team names as they are actually stored, mapped to the badge file that exists.
+ *
+ * The badge URL is derived from the team's name, so the two line up only while
+ * whoever typed the team into the admin screen happened to use the same words
+ * the file is named after. "Man Utd" and "Manchester United" are the same club
+ * and only one of them is a filename, so the short form asks the server for
+ * /badges/man-utd.png, gets a 404, and the board falls back to initials.
+ *
+ * Rather than rename the files to match one spelling, or forbid the short forms
+ * people actually type, the aliases live here. Keys are already slugified, so a
+ * new spelling is one line with no thought about case or punctuation.
+ */
+const BADGE_ALIASES: Record<string, string> = {
+  'man-utd': 'manchester-united',
+  'man-united': 'manchester-united',
+  'manchester-utd': 'manchester-united',
+  'man-city': 'manchester-city',
+  'man-c': 'manchester-city',
+  spurs: 'tottenham',
+  'tottenham-hotspur': 'tottenham',
+  'nottm-forest': 'nottingham-forest',
+  forest: 'nottingham-forest',
+  'newcastle-united': 'newcastle',
+  'newcastle-utd': 'newcastle',
+  'brighton-hove-albion': 'brighton',
+  'brighton-and-hove-albion': 'brighton',
+  'afc-bournemouth': 'bournemouth',
+  leeds: 'leeds-united',
+  'ipswich-town': 'ipswich',
+  'hull-city': 'hull',
+  'coventry-city': 'coventry',
+  'crystal-palace-fc': 'crystal-palace',
+  'aston-villa-fc': 'aston-villa',
+};
+
+const toSlug = (teamName: string) =>
   teamName
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
+
+export const slugify = (teamName: string) => {
+  const slug = toSlug(teamName);
+  return BADGE_ALIASES[slug] ?? slug;
+};
 
 export const coloursFor = (teamName: string): ClubColours =>
   clubColours[slugify(teamName)] ?? { primary: '#4B5563', secondary: '#FFFFFF' };

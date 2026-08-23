@@ -27,7 +27,7 @@ export default function Logout() {
           <div className="space-y-2">
             <h1 className="text-2xl font-semibold tracking-tight">You have been logged out</h1>
             <p className="text-muted-foreground text-sm">
-              Thanks for playing PremPoints 2025/26. Your positions are safe until next matchweek.
+              You have successfully logged out. See you soon!
             </p>
           </div>
 

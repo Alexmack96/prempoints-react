@@ -72,9 +72,23 @@ createRoot(document.getElementById('root')!).render(
           <ThemeProvider>
             <RouterProvider router={router} />
           </ThemeProvider>
-          <ReactQueryDevtools initialIsOpen={false} />
+          {/* Dev only. Vite strips the whole branch from a production build,
+              so players neither see the panel nor download it. */}
+          {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
         </QueryClientProvider>
       </AuthBridge>
     </AuthKitProvider>
   </StrictMode>,
 );
+
+// Registered after load so it never competes with the first paint, and only in
+// a real build: the dev server serves modules the worker has no business
+// intercepting. It caches nothing (see public/sw.js) — it exists so the browser
+// treats this as installable and offers 'Add to Home Screen'.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {
+      // An unregistrable worker costs an install prompt, not the app.
+    });
+  });
+}

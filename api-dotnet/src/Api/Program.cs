@@ -1,5 +1,6 @@
 using Api.Infrastructure;
 using Api.Infrastructure.EntityFramework;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Api.Infrastructure.Endpoints;
@@ -118,7 +119,39 @@ if (app.Environment.IsDevelopment())
 // hand out. Served before authentication so the login page can load its own
 // assets.
 app.UseDefaultFiles();
-app.UseStaticFiles();
+
+// The static file provider refuses to serve an extension it has no content
+// type for, and MapFallbackToFile below would then answer index.html with a
+// text/html content type. The browser rejects that as a manifest and the app
+// silently stops being installable, with a 200 in the logs and nothing to
+// suggest anything is wrong. So the extension is registered explicitly.
+var contentTypes = new FileExtensionContentTypeProvider();
+contentTypes.Mappings[".webmanifest"] = "application/manifest+json";
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    ContentTypeProvider = contentTypes,
+    OnPrepareResponse = context =>
+    {
+        var path = context.Context.Request.Path.Value ?? string.Empty;
+
+        // Vite fingerprints everything under /assets, so the name changes
+        // whenever the contents do and the old name is never reused. That is
+        // exactly the case immutable describes: cache it for a year and the
+        // repeat visit fetches no JavaScript or CSS at all.
+        if (path.StartsWith("/assets/", StringComparison.OrdinalIgnoreCase))
+        {
+            context.Context.Response.Headers.CacheControl = "public, max-age=31536000, immutable";
+            return;
+        }
+
+        // Everything else keeps its name across deploys — index.html, the
+        // manifest, the icon, and above all sw.js, which is how every installed
+        // client learns there is a new version. Cached, they would pin players
+        // to the build they first visited.
+        context.Context.Response.Headers.CacheControl = "no-cache";
+    },
+});
 
 app.UseAuthentication();
 app.UseAuthorization();

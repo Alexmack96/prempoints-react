@@ -162,9 +162,9 @@ public class TestDataSeeder
     {
         _users.AddRange(new[]
         {
-            new UserEntity { Id = TestIds.User(1), WorkOSUserId = "user_1", Username = "Almack", FirstName = "Alex", LastName = "Mackintosh", Email = "am@gmail.com", Role = UserRole.Administrator },
-            new UserEntity { Id = TestIds.User(2), WorkOSUserId = "user_2", Username = "KC", FirstName = "Casey", LastName = "Liddy", Email = "cl@gmail.com", Role = UserRole.Standard },
-            new UserEntity { Id = TestIds.User(3), WorkOSUserId = "user_3", Username = "Andy", FirstName = "Andrew", LastName = "Mackintosh", Email = "ajmack@gmail.com", Role = UserRole.Standard }
+            new UserEntity { Id = TestIds.User(1), WorkOSUserId = "user_1", Username = "Almack", FirstName = "Alex", LastName = "Mackintosh", Role = UserRole.Administrator },
+            new UserEntity { Id = TestIds.User(2), WorkOSUserId = "user_2", Username = "KC", FirstName = "Casey", LastName = "Liddy", Role = UserRole.Standard },
+            new UserEntity { Id = TestIds.User(3), WorkOSUserId = "user_3", Username = "Andy", FirstName = "Andrew", LastName = "Mackintosh", Role = UserRole.Standard }
         });
     }
 

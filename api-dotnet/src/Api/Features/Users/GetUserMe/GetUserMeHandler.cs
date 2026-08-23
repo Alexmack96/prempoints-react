@@ -17,6 +17,9 @@ public class GetUserMeHandler(ILogger<GetUserMeHandler> logger, PremPointsDbCont
         // If you have a 'UserQueries' helper, you can use that here instead.
         var userEntity = await context.Users
             .AsNoTracking() // Read-only optimization
+            // The badge next to a player's name comes from this, and /users/me
+            // is what the whole client reads its identity from.
+            .Include(u => u.FavouriteTeam)
             .FirstOrDefaultAsync(u => u.WorkOSUserId == query.WorkOSUserId, cancellationToken);
 
         if (userEntity is null)

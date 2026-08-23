@@ -1,44 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { BarChart3, LineChart, LogOut, Menu, Settings, Shield, Trophy, X } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { useCurrentUser } from '../auth/useCurrentUser';
+import { useSeasonLabel } from '../seasons/useCurrentSeason';
+import { NAV_ITEMS, SHORTCUTS } from './navItems';
+import BottomNav from './BottomNav';
 import image_prem_lion from '../../assets/prem_lion.jpg';
-
-/**
- * The nav and the keyboard shortcuts read from one list, so a route can never
- * be reachable by Ctrl+Alt+n and missing from the bar, or the other way round.
- *
- * `adminOnly` hides an item from players. Hiding is courtesy, not protection —
- * the route guards itself and the API enforces the role — but a link nobody can
- * use has no business being in the bar.
- */
-const NAV_ITEMS = [
-  { to: '/', label: 'Trade', icon: LineChart, shortcut: '1', end: true, adminOnly: false },
-  {
-    to: '/leaderboard',
-    label: 'Leaderboard',
-    icon: Trophy,
-    shortcut: '2',
-    end: false,
-    adminOnly: false,
-  },
-  { to: '/prices', label: 'Prices', icon: BarChart3, shortcut: '3', end: false, adminOnly: false },
-  { to: '/results', label: 'Results', icon: Shield, shortcut: '4', end: false, adminOnly: false },
-  { to: '/admin', label: 'Admin', icon: Settings, shortcut: '5', end: false, adminOnly: true },
-] as const;
-
-const SHORTCUTS: Record<string, string> = {
-  ...Object.fromEntries(NAV_ITEMS.map((item) => [item.shortcut, item.to])),
-  '0': '/logout',
-};
 
 export default function NavBar() {
   const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
   const { data: me } = useCurrentUser();
+  const season = useSeasonLabel();
 
   const isAdmin = me?.role === 'Administrator';
   const items = NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin);
@@ -69,92 +44,77 @@ export default function NavBar() {
     );
 
   return (
-    <header className="sticky top-0 z-40">
-      <div className="glass border-border/60 border-b">
-        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-          <NavLink to="/" className="flex min-w-0 items-center gap-3">
-            <span className="from-primary/70 to-primary/20 rounded-full bg-gradient-to-br p-[2px]">
-              <img
-                src={image_prem_lion}
-                alt=""
-                className="border-background size-9 rounded-full border-2 object-cover"
-              />
-            </span>
-            <span className="min-w-0">
-              <span className="block truncate text-sm leading-tight font-semibold tracking-tight">
-                PremPoints
+    <>
+      <header className="sticky top-0 z-40">
+        <div className="glass border-border/60 border-b">
+          <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+            <NavLink to="/" className="flex min-w-0 items-center gap-3">
+              <span className="from-primary/70 to-primary/20 rounded-full bg-gradient-to-br p-[2px]">
+                <img
+                  src={image_prem_lion}
+                  alt=""
+                  className="border-background size-9 rounded-full border-2 object-cover"
+                />
               </span>
-              <span className="text-muted-foreground block text-[11px] leading-tight">2025/26</span>
-            </span>
-          </NavLink>
+              <span className="min-w-0">
+                <span className="block truncate text-sm leading-tight font-semibold tracking-tight">
+                  PremPoints
+                </span>
+                {season && (
+                  <span className="text-muted-foreground block text-[11px] leading-tight">
+                    {season}
+                  </span>
+                )}
+              </span>
+            </NavLink>
 
-          <nav className="hidden items-center gap-1 md:flex">
-            {items.map(({ to, label, icon: Icon, shortcut, end }) => (
-              <NavLink
-                key={to}
-                to={to}
-                end={end}
-                className={linkClasses}
-                title={`Ctrl+Alt+${shortcut}`}
-              >
-                <Icon className="size-4 opacity-70" />
-                {label}
-              </NavLink>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-1">
-            <ThemeToggle />
-            <Button
-              asChild
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground hover:text-foreground hidden md:inline-flex"
-            >
-              <NavLink to="/logout" title="Ctrl+Alt+0">
-                <LogOut className="size-4" />
-                Log out
-              </NavLink>
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-              aria-expanded={menuOpen}
-              onClick={() => setMenuOpen((open) => !open)}
-            >
-              {menuOpen ? <X className="size-4" /> : <Menu className="size-4" />}
-            </Button>
-          </div>
-        </div>
-
-        {menuOpen && (
-          <nav className="border-border/60 border-t px-4 py-3 md:hidden">
-            <ul className="flex flex-col gap-1">
-              {items.map(({ to, label, icon: Icon, end }) => (
-                <li key={to}>
-                  <NavLink
-                    to={to}
-                    end={end}
-                    className={linkClasses}
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    <Icon className="size-4 opacity-70" />
-                    {label}
-                  </NavLink>
-                </li>
+            <nav className="hidden items-center gap-1 md:flex">
+              {items.map(({ to, label, icon: Icon, shortcut, end }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  end={end}
+                  className={linkClasses}
+                  title={`Ctrl+Alt+${shortcut}`}
+                >
+                  <Icon className="size-4 opacity-70" />
+                  {label}
+                </NavLink>
               ))}
-              <li>
-                <NavLink to="/logout" className={linkClasses} onClick={() => setMenuOpen(false)}>
-                  <LogOut className="size-4 opacity-70" />
+            </nav>
+
+            <div className="flex items-center gap-1">
+              <ThemeToggle />
+              {/* Log out keeps its place in the top bar on every width. It is
+                  not a destination, and giving it a sixth tab alongside the
+                  five real ones would invite a mis-tap on the way to Admin. */}
+              <Button
+                asChild
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground hover:text-foreground md:hidden"
+              >
+                <NavLink to="/logout" aria-label="Log out">
+                  <LogOut className="size-4" />
+                </NavLink>
+              </Button>
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-foreground hidden md:inline-flex"
+              >
+                <NavLink to="/logout" title="Ctrl+Alt+0">
+                  <LogOut className="size-4" />
                   Log out
                 </NavLink>
-              </li>
-            </ul>
-          </nav>
-        )}
-      </div>
-    </header>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <BottomNav items={items} />
+    </>
   );
 }

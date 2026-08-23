@@ -40,11 +40,9 @@ public class PremPointsDbContext : DbContext
         {
             entity.Property(x => x.Username).IsRequired();
             entity.Property(x => x.FirstName).IsRequired();
-            entity.Property(x => x.Email).IsRequired();
             entity.Property(x => x.Role).IsRequired();
 
             entity.HasIndex(e => new { e.Username }).IsUnique();
-            entity.HasIndex(e => new { e.Email }).IsUnique();
         });
         modelBuilder.Entity<TeamEntity>(entity =>
         {

@@ -1,4 +1,4 @@
-using Api.Infrastructure.EntityFramework;
+using Api.Infrastructure;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -64,26 +64,48 @@ public class TestAuthHandler(
             new(ClaimTypes.Name, workOsUserId),
         };
 
-        using var scope = scopeFactory.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<PremPointsDbContext>();
-
-        var user = await context.Users
-            .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.WorkOSUserId == workOsUserId);
-
-        // An unknown WorkOS id authenticates but carries no role, which is
-        // exactly what production does — the token is valid, the person just
-        // is not a player yet.
-        if (user is not null)
-        {
-            claims.Add(new Claim("InternalUserId", user.Id.ToString()));
-            claims.Add(new Claim(ClaimTypes.Role, user.Role.ToString()));
-        }
+        // The profile claims a WorkOS JWT template would carry, so a test can
+        // exercise first sign-in provisioning. Sent as headers because that is
+        // the only channel this handler has; production reads the same claim
+        // names off the validated token.
+        AddIfPresent(claims, WorkOsProfileClaims.Email, "X-Test-Email");
+        AddIfPresent(claims, WorkOsProfileClaims.FirstName, "X-Test-First-Name");
+        AddIfPresent(claims, WorkOsProfileClaims.LastName, "X-Test-Last-Name");
 
         var identity = new ClaimsIdentity(claims, AuthenticationScheme);
         var principal = new ClaimsPrincipal(identity);
+
+        using var scope = scopeFactory.CreateScope();
+        var provisioner = scope.ServiceProvider.GetRequiredService<IUserProvisioner>();
+
+        // The same service production calls, so provisioning is covered by the
+        // suite rather than only existing on the JwtBearer path the tests
+        // replace wholesale.
+        var user = await provisioner.ResolveAsync(principal, Context.RequestAborted);
+
+        // An unknown WorkOS id with no profile claims authenticates but carries
+        // no role, which is exactly what production does — the token is valid,
+        // the person just is not a player yet.
+        if (user is not null)
+        {
+            identity.AddClaim(new Claim("InternalUserId", user.Id.ToString()));
+            identity.AddClaim(new Claim(ClaimTypes.Role, user.Role.ToString()));
+        }
+
         var ticket = new AuthenticationTicket(principal, AuthenticationScheme);
 
         return AuthenticateResult.Success(ticket);
+    }
+    /// Copies a test header onto the principal as the claim a WorkOS JWT
+    /// template would have supplied. Absent header, absent claim — which is
+    /// what an unconfigured template looks like.
+    private void AddIfPresent(List<Claim> claims, string claimType, string headerName)
+    {
+        var value = Context.Request.Headers[headerName].ToString();
+
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            claims.Add(new Claim(claimType, value));
+        }
     }
 }
